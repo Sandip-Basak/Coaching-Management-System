@@ -1,0 +1,232 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Question Bank{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h2">Question Bank</h1>
+        <div>
+            <a href="{% url 'create_question' %}" class="btn btn-primary me-2">
+                <i class="fas fa-plus-circle"></i> Add Question
+            </a>
+            <a href="{% url 'import_questions' %}" class="btn btn-outline-primary me-2">
+                <i class="fas fa-file-import"></i> Import from Excel
+            </a>
+            <a href="{% url 'ai_questions' %}" class="btn btn-outline-primary">
+                <i class="fas fa-robot"></i> Generate with AI
+            </a>
+        </div>
+    </div>
+
+    <!-- Filter and Search -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-6">
+                    <div class="input-group">
+                        <span class="input-group-text">Search</span>
+                        <input type="text" class="form-control" name="q" value="{{ request.GET.q }}" placeholder="Search by question text...">
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <select class="form-select" name="marks">
+                        <option value="">-- Any Marks --</option>
+                        <option value="1" {% if request.GET.marks == '1' %}selected{% endif %}>1 Mark</option>
+                        <option value="2" {% if request.GET.marks == '2' %}selected{% endif %}>2 Marks</option>
+                        <option value="3" {% if request.GET.marks == '3' %}selected{% endif %}>3 Marks</option>
+                        <option value="4" {% if request.GET.marks == '4' %}selected{% endif %}>4 Marks</option>
+                        <option value="5" {% if request.GET.marks == '5' %}selected{% endif %}>5 Marks</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <select class="form-select" name="type">
+                        <option value="">-- Question Type --</option>
+                        <option value="single" {% if request.GET.type == 'single' %}selected{% endif %}>Single Answer</option>
+                        <option value="multiple" {% if request.GET.type == 'multiple' %}selected{% endif %}>Multiple Answer</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100">Filter</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Questions List -->
+    <div class="card">
+        <div class="card-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0">Questions</h5>
+                <span class="badge bg-primary">{{ questions.count }} Questions</span>
+            </div>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th style="width: 50px;">#</th>
+                            <th>Question</th>
+                            <th style="width: 80px;">Marks</th>
+                            <th style="width: 100px;">Type</th>
+                            <th style="width: 150px;">Used In</th>
+                            <th style="width: 120px;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for question in questions %}
+                            <tr>
+                                <td>{{ forloop.counter }}</td>
+                                <td>{{ question.text|truncatechars:100 }}</td>
+                                <td class="text-center">{{ question.marks }}</td>
+                                <td class="text-center">
+                                    {% if question.multiple_correct %}
+                                        <span class="badge bg-info">Multiple</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">Single</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-center">
+                                    <span class="badge bg-primary">{{ question.practice_papers.count }} Papers</span>
+                                    <span class="badge bg-warning">{{ question.mock_exams.count }} Exams</span>
+                                </td>
+                                <td>
+                                    <a href="{% url 'edit_question' question.id %}" class="btn btn-sm btn-outline-primary" data-bs-toggle="tooltip" title="Edit">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#questionModal{{ question.id }}" title="Preview">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            
+                            <!-- Question Preview Modal -->
+                            <div class="modal fade" id="questionModal{{ question.id }}" tabindex="-1" aria-labelledby="questionModalLabel{{ question.id }}" aria-hidden="true">
+                                <div class="modal-dialog modal-lg">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="questionModalLabel{{ question.id }}">Question Preview</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <div class="question-card p-3 border rounded mb-3">
+                                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                                    <h5 class="mb-0">{{ question.text }}</h5>
+                                                    <div>
+                                                        <span class="badge bg-primary">{{ question.marks }} Marks</span>
+                                                        {% if question.multiple_correct %}
+                                                            <span class="badge bg-info ms-1">Multiple Correct</span>
+                                                        {% else %}
+                                                            <span class="badge bg-secondary ms-1">Single Correct</span>
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="options-list mt-3">
+                                                    {% for option in question.options.all %}
+                                                        <div class="form-check mb-2">
+                                                            <input 
+                                                                class="form-check-input" 
+                                                                type="{% if question.multiple_correct %}checkbox{% else %}radio{% endif %}" 
+                                                                disabled
+                                                                {% if option.is_correct %}checked{% endif %}
+                                                            >
+                                                            <label class="form-check-label {% if option.is_correct %}text-success fw-bold{% endif %}">
+                                                                {{ option.text }}
+                                                                {% if option.is_correct %}
+                                                                    <i class="fas fa-check-circle text-success ms-1"></i>
+                                                                {% endif %}
+                                                            </label>
+                                                        </div>
+                                                    {% endfor %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <a href="{% url 'edit_question' question.id %}" class="btn btn-primary">Edit Question</a>
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% empty %}
+                            <tr>
+                                <td colspan="6" class="text-center py-4">
+                                    <p class="text-muted mb-0">No questions found. Add some questions to your question bank.</p>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    {% if is_paginated %}
+        <div class="mt-4">
+            <nav>
+                <ul class="pagination justify-content-center">
+                    {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page=1{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">First</a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">Previous</a>
+                        </li>
+                    {% else %}
+                        <li class="page-item disabled">
+                            <a class="page-link" href="#">First</a>
+                        </li>
+                        <li class="page-item disabled">
+                            <a class="page-link" href="#">Previous</a>
+                        </li>
+                    {% endif %}
+                    
+                    {% for i in paginator.page_range %}
+                        {% if page_obj.number == i %}
+                            <li class="page-item active">
+                                <a class="page-link" href="#">{{ i }}</a>
+                            </li>
+                        {% elif i > page_obj.number|add:'-3' and i < page_obj.number|add:'3' %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ i }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">{{ i }}</a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">Next</a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ paginator.num_pages }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">Last</a>
+                        </li>
+                    {% else %}
+                        <li class="page-item disabled">
+                            <a class="page-link" href="#">Next</a>
+                        </li>
+                        <li class="page-item disabled">
+                            <a class="page-link" href="#">Last</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize tooltips
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    });
+</script>
+{% endblock %}

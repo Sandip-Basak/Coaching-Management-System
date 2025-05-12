@@ -1,0 +1,127 @@
+{% extends 'base.html' %}
+
+{% block title %}My Profile - Coaching Management System{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <h1 class="mb-4">My Profile</h1>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-header bg-dark">
+                <h5 class="card-title mb-0">Profile Picture</h5>
+            </div>
+            <div class="card-body text-center">
+                {% if profile.profile_photo %}
+                    <img src="{{ profile.profile_photo.url }}" alt="Profile Photo" class="img-fluid rounded-circle mb-3" style="max-width: 200px; max-height: 200px;">
+                {% else %}
+                    <div class="bg-secondary rounded-circle d-flex justify-content-center align-items-center mx-auto mb-3" style="width: 200px; height: 200px;">
+                        <i class="fas fa-user fa-6x text-light"></i>
+                    </div>
+                {% endif %}
+                
+                <a href="{% url 'profile_edit' %}" class="btn btn-primary">
+                    <i class="fas fa-edit me-2"></i>Edit Profile
+                </a>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header bg-dark">
+                <h5 class="card-title mb-0">Account Status</h5>
+            </div>
+            <div class="card-body">
+                <p class="mb-1">
+                    <strong>Status:</strong>
+                    {% if profile.approved %}
+                        <span class="badge bg-success">Approved</span>
+                    {% else %}
+                        <span class="badge bg-warning">Pending Approval</span>
+                    {% endif %}
+                </p>
+                <p class="mb-1">
+                    <strong>User Type:</strong>
+                    {% if user.is_admin_staff %}
+                        Admin Staff
+                    {% elif user.is_staff %}
+                        Staff
+                    {% else %}
+                        Student
+                    {% endif %}
+                </p>
+                <p class="mb-1">
+                    <strong>Joined:</strong> {{ user.date_joined|date:"F d, Y" }}
+                </p>
+                <p class="mb-1">
+                    <strong>Last Login:</strong> {{ user.last_login|date:"F d, Y H:i" }}
+                </p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-header bg-dark">
+                <h5 class="card-title mb-0">Personal Information</h5>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-4 fw-bold">Full Name:</div>
+                    <div class="col-md-8">{{ user.first_name }} {{ user.last_name }}</div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-4 fw-bold">Username:</div>
+                    <div class="col-md-8">{{ user.username }}</div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-4 fw-bold">Email:</div>
+                    <div class="col-md-8">{{ user.email }}</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header bg-dark">
+                <h5 class="card-title mb-0">My Batches</h5>
+            </div>
+            <div class="card-body">
+                {% if batches %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Batch Name</th>
+                                    <th>Course</th>
+                                    <th>Duration</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for batch in batches %}
+                                    <tr>
+                                        <td>{{ batch.name }}</td>
+                                        <td>{{ batch.course.name }}</td>
+                                        <td>{{ batch.start_date|date:"M d, Y" }} - {{ batch.end_date|date:"M d, Y" }}</td>
+                                        <td>
+                                            <a href="{% url 'batch_detail' batch.id %}" class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-eye me-1"></i>View
+                                            </a>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="text-muted">You are not enrolled in any batches yet.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

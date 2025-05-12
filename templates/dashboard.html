@@ -1,0 +1,174 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - Coaching Management System{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <h1 class="mb-4">Student Dashboard</h1>
+        
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle me-2"></i> Welcome back, {{ user.first_name }}! Here's your learning dashboard.
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-header bg-dark">
+                <h5 class="card-title mb-0">Your Batches</h5>
+            </div>
+            <div class="card-body">
+                {% if student_batches %}
+                    <ul class="list-group list-group-flush">
+                        {% for batch in student_batches %}
+                            <li class="list-group-item bg-transparent">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <strong>{{ batch.name }}</strong>
+                                        <div class="text-muted small">{{ batch.course.name }}</div>
+                                    </div>
+                                    <a href="{% url 'batch_detail' batch.id %}" class="btn btn-sm btn-outline-primary">View</a>
+                                </div>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="text-muted">You are not enrolled in any batches yet.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-8">
+        <div class="card h-100">
+            <div class="card-header bg-dark">
+                <h5 class="card-title mb-0">Upcoming Exams</h5>
+            </div>
+            <div class="card-body">
+                {% if upcoming_exams %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Exam Name</th>
+                                    <th>Course</th>
+                                    <th>Time Limit</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for exam in upcoming_exams %}
+                                    <tr>
+                                        <td>{{ exam.name }}</td>
+                                        <td>{{ exam.course.name }}</td>
+                                        <td>{{ exam.time_limit }} minutes</td>
+                                        <td>
+                                            <a href="{% url 'start_exam' 'mock' exam.id %}" class="btn btn-sm btn-primary">Start Exam</a>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="text-muted">No upcoming exams at the moment.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header bg-dark">
+                <h5 class="card-title mb-0">Practice Papers</h5>
+            </div>
+            <div class="card-body">
+                {% if practice_papers %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Course</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for paper in practice_papers %}
+                                    <tr>
+                                        <td>{{ paper.name }}</td>
+                                        <td>{{ paper.course.name }}</td>
+                                        <td>
+                                            <a href="{% url 'start_exam' 'practice' paper.id %}" class="btn btn-sm btn-outline-primary">Start Practice</a>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="text-muted">No practice papers available for your courses.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header bg-dark">
+                <h5 class="card-title mb-0">Recent Attempts</h5>
+            </div>
+            <div class="card-body">
+                {% if attempts %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Exam/Paper</th>
+                                    <th>Date</th>
+                                    <th>Score</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for attempt in attempts %}
+                                    <tr>
+                                        <td>
+                                            {% if attempt.attempt_type == 'practice' %}
+                                                {{ attempt.practice_paper.name }}
+                                            {% else %}
+                                                {{ attempt.mock_exam.name }}
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ attempt.start_time|date:"M d, Y" }}</td>
+                                        <td>
+                                            {% if attempt.score != None %}
+                                                {{ attempt.score|floatformat:2 }}%
+                                            {% else %}
+                                                -
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if attempt.status == 'completed' %}
+                                                <a href="{% url 'exam_results' attempt.id %}" class="btn btn-sm btn-outline-info">View Results</a>
+                                            {% else %}
+                                                <span class="badge bg-warning">In Progress</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="text-muted">You haven't attempted any exams or practice papers yet.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

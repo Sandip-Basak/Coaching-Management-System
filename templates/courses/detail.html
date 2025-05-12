@@ -1,0 +1,170 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ course.name }} - Course Details{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h2">{{ course.name }}</h1>
+        {% if user.is_admin_staff or user.is_staff %}
+            <div>
+                <a href="{% url 'edit_course' course.slug %}" class="btn btn-outline-primary">
+                    <i class="fas fa-edit"></i> Edit Course
+                </a>
+            </div>
+        {% endif %}
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="card-title mb-0">Course Details</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-8">
+                    <p class="card-text">{{ course.description }}</p>
+                    <p class="text-muted">
+                        <small>Created: {{ course.created_at|date:"F d, Y" }}</small>
+                    </p>
+                </div>
+                <div class="col-md-4">
+                    <div class="card bg-dark">
+                        <div class="card-body">
+                            <h6 class="card-subtitle mb-2 text-muted">Course Overview</h6>
+                            <ul class="list-unstyled">
+                                <li><strong>Batches:</strong> {{ batches|length }}</li>
+                                <li><strong>Practice Papers:</strong> {{ practice_papers|length }}</li>
+                                <li><strong>Mock Exams:</strong> {{ mock_exams|length }}</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Batches Section -->
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="card-title mb-0">Batches</h5>
+            {% if user.is_admin_staff or user.is_staff %}
+                <a href="{% url 'create_batch' %}" class="btn btn-sm btn-outline-primary">
+                    <i class="fas fa-plus-circle"></i> Add Batch
+                </a>
+            {% endif %}
+        </div>
+        <div class="card-body">
+            {% if batches %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Start Date</th>
+                                <th>End Date</th>
+                                <th>Students</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for batch in batches %}
+                                <tr>
+                                    <td>{{ batch.name }}</td>
+                                    <td>{{ batch.start_date|date:"M d, Y" }}</td>
+                                    <td>{{ batch.end_date|date:"M d, Y" }}</td>
+                                    <td>{{ batch.students.count }}</td>
+                                    <td>
+                                        <a href="{% url 'batch_detail' batch.id %}" class="btn btn-sm btn-outline-info">View</a>
+                                        {% if user.is_admin_staff or user.is_staff %}
+                                            <a href="{% url 'edit_batch' batch.id %}" class="btn btn-sm btn-outline-secondary">Edit</a>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p class="text-muted">No batches have been created for this course yet.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Practice Papers Section -->
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="card-title mb-0">Practice Papers</h5>
+            {% if user.is_admin_staff or user.is_staff %}
+                <a href="{% url 'create_practice_paper' %}" class="btn btn-sm btn-outline-primary">
+                    <i class="fas fa-plus-circle"></i> Add Practice Paper
+                </a>
+            {% endif %}
+        </div>
+        <div class="card-body">
+            {% if practice_papers %}
+                <div class="row">
+                    {% for paper in practice_papers %}
+                        <div class="col-md-6 mb-3">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ paper.name }}</h5>
+                                    <p class="card-text text-muted">
+                                        <small>{{ paper.questions.count }} questions | {{ paper.time_limit }} minutes</small>
+                                    </p>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span class="badge {% if paper.allowed_for_trial %}bg-success{% else %}bg-secondary{% endif %}">
+                                            {{ paper.allowed_for_trial|yesno:"Trial Allowed,Trial Disabled" }}
+                                        </span>
+                                        <a href="{% url 'start_exam' 'practice' paper.id %}" class="btn btn-sm btn-primary">Start Practice</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="text-muted">No practice papers have been created for this course yet.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Mock Exams Section -->
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="card-title mb-0">Mock Exams</h5>
+            {% if user.is_admin_staff or user.is_staff %}
+                <a href="{% url 'create_mock_exam' %}" class="btn btn-sm btn-outline-primary">
+                    <i class="fas fa-plus-circle"></i> Add Mock Exam
+                </a>
+            {% endif %}
+        </div>
+        <div class="card-body">
+            {% if mock_exams %}
+                <div class="row">
+                    {% for exam in mock_exams %}
+                        <div class="col-md-6 mb-3">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ exam.name }}</h5>
+                                    <p class="card-text text-muted">
+                                        <small>{{ exam.questions.count }} questions | {{ exam.time_limit }} minutes</small>
+                                    </p>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span class="badge {% if exam.results_released %}bg-success{% else %}bg-secondary{% endif %}">
+                                            {{ exam.results_released|yesno:"Results Released,Results Hidden" }}
+                                        </span>
+                                        <a href="{% url 'start_exam' 'mock' exam.id %}" class="btn btn-sm btn-primary">Start Exam</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="text-muted">No mock exams have been created for this course yet.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

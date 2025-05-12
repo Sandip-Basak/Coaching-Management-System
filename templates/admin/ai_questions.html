@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+
+{% block title %}Generate AI Questions - Coaching Management System{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Generate Questions with AI</h1>
+    <a href="{% url 'admin_dashboard' %}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+    </a>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-header bg-dark">
+                <h5 class="card-title mb-0">AI Question Generator</h5>
+            </div>
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.pdf_file.id_for_label }}" class="form-label">Upload PDF File</label>
+                        {{ form.pdf_file }}
+                        {% if form.pdf_file.errors %}
+                            <div class="text-danger mt-1">
+                                {% for error in form.pdf_file.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        <div class="form-text text-light">
+                            Upload a PDF document with the content for which you want to generate questions.
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.num_questions.id_for_label }}" class="form-label">Number of Questions</label>
+                        {{ form.num_questions }}
+                        {% if form.num_questions.errors %}
+                            <div class="text-danger mt-1">
+                                {% for error in form.num_questions.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        <div class="form-text text-light">{{ form.num_questions.help_text }}</div>
+                    </div>
+                    
+                    <div class="alert alert-info">
+                        <h6 class="mb-2"><i class="fas fa-info-circle me-2"></i>How AI Question Generation Works:</h6>
+                        <ol>
+                            <li>Upload a PDF document containing educational content.</li>
+                            <li>The system extracts text from the PDF.</li>
+                            <li>The text is sent to Google Gemini AI API, which analyzes the content.</li>
+                            <li>The API generates multiple-choice questions based on the content.</li>
+                            <li>Questions are automatically added to your question bank for use in exams and practice papers.</li>
+                        </ol>
+                        <p class="mb-0"><i class="fas fa-lightbulb me-2"></i><strong>Tip:</strong> For better results, upload PDFs with clear, educational content related to your course material.</p>
+                    </div>
+                    
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-robot me-2"></i>Generate Questions
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header bg-dark">
+                <h5 class="card-title mb-0">Tips for Best Results</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item bg-transparent">
+                        <i class="fas fa-check-circle text-success me-2"></i>
+                        <strong>PDF Size:</strong> Ensure your PDF is not too large. The system processes the first 10,000 characters.
+                    </li>
+                    <li class="list-group-item bg-transparent">
+                        <i class="fas fa-check-circle text-success me-2"></i>
+                        <strong>Content Quality:</strong> Use structured educational content with clear concepts.
+                    </li>
+                    <li class="list-group-item bg-transparent">
+                        <i class="fas fa-check-circle text-success me-2"></i>
+                        <strong>Topic Focus:</strong> PDFs that focus on a specific topic yield better questions.
+                    </li>
+                    <li class="list-group-item bg-transparent">
+                        <i class="fas fa-check-circle text-success me-2"></i>
+                        <strong>Question Count:</strong> Start with 5-10 questions to test quality before generating larger sets.
+                    </li>
+                    <li class="list-group-item bg-transparent">
+                        <i class="fas fa-check-circle text-success me-2"></i>
+                        <strong>Review:</strong> Always review AI-generated questions before using them in exams.
+                    </li>
+                </ul>
+                
+                <div class="alert alert-warning mt-3">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <strong>Note:</strong> The AI question generation process may take up to a minute to complete, depending on the size of your PDF and the number of questions requested.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

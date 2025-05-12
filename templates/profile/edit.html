@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Profile - Coaching Management System{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow">
+            <div class="card-header bg-dark">
+                <h4 class="mb-0">Edit Profile</h4>
+            </div>
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    
+                    <div class="row mb-4">
+                        <div class="col-md-3 text-center">
+                            {% if user.student_profile.profile_photo %}
+                                <img src="{{ user.student_profile.profile_photo.url }}" alt="Current Profile Photo" class="img-fluid rounded-circle mb-3" style="max-width: 150px; max-height: 150px;">
+                            {% else %}
+                                <div class="bg-secondary rounded-circle d-flex justify-content-center align-items-center mx-auto mb-3" style="width: 150px; height: 150px;">
+                                    <i class="fas fa-user fa-5x text-light"></i>
+                                </div>
+                            {% endif %}
+                            <p class="text-muted small">Current Photo</p>
+                        </div>
+                        <div class="col-md-9">
+                            <div class="mb-3">
+                                <label for="{{ form.profile_photo.id_for_label }}" class="form-label">Upload New Profile Photo</label>
+                                {{ form.profile_photo }}
+                                {% if form.profile_photo.errors %}
+                                    <div class="text-danger mt-1">
+                                        {% for error in form.profile_photo.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                                <div class="form-text text-light">
+                                    Select a new profile photo to upload. Leave empty to keep current photo.
+                                </div>
+                            </div>
+                            
+                            <div class="mt-4">
+                                <p class="text-muted">
+                                    <i class="fas fa-info-circle me-2"></i>To update your password or change other account details, please contact an administrator.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between">
+                        <a href="{% url 'profile_view' %}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>Back to Profile
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-2"></i>Save Changes
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

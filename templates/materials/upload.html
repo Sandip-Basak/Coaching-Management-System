@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Upload Course Material{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title text-center">Upload Course Material</h3>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.title.id_for_label }}" class="form-label">Title</label>
+                            {{ form.title }}
+                            {% if form.title.errors %}
+                                <div class="text-danger">
+                                    {{ form.title.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.description.id_for_label }}" class="form-label">Description</label>
+                            {{ form.description }}
+                            {% if form.description.errors %}
+                                <div class="text-danger">
+                                    {{ form.description.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.material_type.id_for_label }}" class="form-label">Material Type</label>
+                            {{ form.material_type }}
+                            {% if form.material_type.errors %}
+                                <div class="text-danger">
+                                    {{ form.material_type.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3" id="file-upload-section">
+                            <label for="{{ form.file.id_for_label }}" class="form-label">Upload File (PDF)</label>
+                            {{ form.file }}
+                            <div class="form-text">Accepted file types: PDF</div>
+                            {% if form.file.errors %}
+                                <div class="text-danger">
+                                    {{ form.file.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3" id="video-embed-section" style="display: none;">
+                            <label for="{{ form.video_embed_code.id_for_label }}" class="form-label">Video Embed Code</label>
+                            {{ form.video_embed_code }}
+                            <div class="form-text">Paste embed code from YouTube, Vimeo, etc.</div>
+                            {% if form.video_embed_code.errors %}
+                                <div class="text-danger">
+                                    {{ form.video_embed_code.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.batch.id_for_label }}" class="form-label">Batch</label>
+                            {{ form.batch }}
+                            {% if form.batch.errors %}
+                                <div class="text-danger">
+                                    {{ form.batch.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">Upload Material</button>
+                            <a href="/materials/" class="btn btn-outline-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const materialTypeSelect = document.getElementById('{{ form.material_type.id_for_label }}');
+        const fileUploadSection = document.getElementById('file-upload-section');
+        const videoEmbedSection = document.getElementById('video-embed-section');
+        
+        function toggleSections() {
+            if (materialTypeSelect.value === 'pdf') {
+                fileUploadSection.style.display = 'block';
+                videoEmbedSection.style.display = 'none';
+            } else if (materialTypeSelect.value === 'video') {
+                fileUploadSection.style.display = 'none';
+                videoEmbedSection.style.display = 'block';
+            }
+        }
+        
+        materialTypeSelect.addEventListener('change', toggleSections);
+        
+        // Initialize on page load
+        toggleSections();
+        
+        // Validate file size
+        const fileInput = document.getElementById('{{ form.file.id_for_label }}');
+        const maxSize = 20 * 1024 * 1024; // 20MB
+        
+        fileInput.addEventListener('change', function() {
+            if (fileInput.files.length > 0) {
+                if (fileInput.files[0].size > maxSize) {
+                    alert('File size exceeds the maximum allowed (20MB). Please choose a smaller file.');
+                    fileInput.value = '';
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

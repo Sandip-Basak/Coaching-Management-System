@@ -1,0 +1,237 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ batch.name }} - Batch Details{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h2">{{ batch.name }}</h1>
+            <p class="text-muted">{{ batch.course.name }}</p>
+        </div>
+        {% if user.is_admin_staff or user.is_staff %}
+            <div>
+                <a href="{% url 'edit_batch' batch.id %}" class="btn btn-outline-primary">
+                    <i class="fas fa-edit"></i> Edit Batch
+                </a>
+            </div>
+        {% endif %}
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Batch Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-4 fw-bold">Course:</div>
+                        <div class="col-md-8">
+                            <a href="{% url 'course_detail' batch.course.slug %}">{{ batch.course.name }}</a>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-4 fw-bold">Duration:</div>
+                        <div class="col-md-8">
+                            {{ batch.start_date|date:"M d, Y" }} to {{ batch.end_date|date:"M d, Y" }}
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-4 fw-bold">Total Students:</div>
+                        <div class="col-md-8">{{ students|length }}</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-4 fw-bold">Study Materials:</div>
+                        <div class="col-md-8">{{ materials|length }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Batch Timeline</h5>
+                </div>
+                <div class="card-body">
+                    <div class="timeline">
+                        <div class="timeline-item">
+                            <div class="timeline-marker bg-primary"></div>
+                            <div class="timeline-content">
+                                <h6 class="timeline-title">Batch Created</h6>
+                                <p class="timeline-text">{{ batch.created_at|date:"M d, Y" }}</p>
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-marker bg-info"></div>
+                            <div class="timeline-content">
+                                <h6 class="timeline-title">Batch Started</h6>
+                                <p class="timeline-text">{{ batch.start_date|date:"M d, Y" }}</p>
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-marker {% if batch.end_date < current_date %}bg-success{% else %}bg-secondary{% endif %}"></div>
+                            <div class="timeline-content">
+                                <h6 class="timeline-title">Batch Ends</h6>
+                                <p class="timeline-text">{{ batch.end_date|date:"M d, Y" }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Students Section -->
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="card-title mb-0">Students</h5>
+            {% if user.is_admin_staff or user.is_staff %}
+                <a href="{% url 'edit_batch' batch.id %}" class="btn btn-sm btn-outline-primary">
+                    <i class="fas fa-user-plus"></i> Manage Students
+                </a>
+            {% endif %}
+        </div>
+        <div class="card-body">
+            {% if students %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Username</th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for student in students %}
+                                <tr>
+                                    <td>{{ student.user.username }}</td>
+                                    <td>{{ student.user.first_name }} {{ student.user.last_name }}</td>
+                                    <td>{{ student.user.email }}</td>
+                                    <td>
+                                        {% if student.approved %}
+                                            <span class="badge bg-success">Approved</span>
+                                        {% else %}
+                                            <span class="badge bg-warning">Pending</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p class="text-muted">No students enrolled in this batch yet.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Materials Section -->
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="card-title mb-0">Study Materials</h5>
+            {% if user.is_admin_staff or user.is_staff %}
+                <a href="{% url 'upload_material' %}" class="btn btn-sm btn-outline-primary">
+                    <i class="fas fa-upload"></i> Upload Material
+                </a>
+            {% endif %}
+        </div>
+        <div class="card-body">
+            {% if materials %}
+                <div class="row">
+                    {% for material in materials %}
+                        <div class="col-md-6 mb-3">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ material.title }}</h5>
+                                    {% if material.description %}
+                                        <p class="card-text">{{ material.description|truncatechars:100 }}</p>
+                                    {% endif %}
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span class="badge {% if material.material_type == 'pdf' %}bg-danger{% else %}bg-info{% endif %}">
+                                            {{ material.get_material_type_display }}
+                                        </span>
+                                        {% if material.material_type == 'pdf' %}
+                                            <a href="{{ material.file.url }}" class="btn btn-sm btn-primary" target="_blank">Download</a>
+                                        {% else %}
+                                            <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#videoModal{{ material.id }}">
+                                                Watch Video
+                                            </button>
+                                            
+                                            <!-- Video Modal -->
+                                            <div class="modal fade" id="videoModal{{ material.id }}" tabindex="-1" aria-labelledby="videoModalLabel{{ material.id }}" aria-hidden="true">
+                                                <div class="modal-dialog modal-lg">
+                                                    <div class="modal-content">
+                                                        <div class="modal-header">
+                                                            <h5 class="modal-title" id="videoModalLabel{{ material.id }}">{{ material.title }}</h5>
+                                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                        </div>
+                                                        <div class="modal-body">
+                                                            <div class="ratio ratio-16x9">
+                                                                {{ material.video_embed_code|safe }}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="card-footer text-muted">
+                                    <small>
+                                        Uploaded by {{ material.uploaded_by.username }} on {{ material.uploaded_at|date:"M d, Y" }}
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="text-muted">No study materials have been uploaded for this batch yet.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_head %}
+<style>
+    .timeline {
+        position: relative;
+        padding-left: 30px;
+    }
+    
+    .timeline-item {
+        position: relative;
+        margin-bottom: 25px;
+    }
+    
+    .timeline-marker {
+        position: absolute;
+        left: -30px;
+        width: 15px;
+        height: 15px;
+        border-radius: 50%;
+    }
+    
+    .timeline-title {
+        margin-bottom: 5px;
+    }
+    
+    .timeline-text {
+        margin-bottom: 5px;
+    }
+    
+    .timeline::before {
+        content: '';
+        position: absolute;
+        left: -23px;
+        width: 2px;
+        height: 100%;
+        background-color: var(--bs-secondary);
+    }
+</style>
+{% endblock %}

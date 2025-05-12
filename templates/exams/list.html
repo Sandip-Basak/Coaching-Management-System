@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+
+{% block title %}Exams - Coaching Management System{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Exams & Practice Papers</h1>
+    {% if user.is_admin_staff or user.is_staff %}
+        <div>
+            <a href="{% url 'create_practice_paper' %}" class="btn btn-primary me-2">
+                <i class="fas fa-plus-circle me-2"></i>Add Practice Paper
+            </a>
+            <a href="{% url 'create_mock_exam' %}" class="btn btn-success">
+                <i class="fas fa-plus-circle me-2"></i>Add Mock Exam
+            </a>
+        </div>
+    {% endif %}
+</div>
+
+<ul class="nav nav-tabs mb-4" id="examTabs" role="tablist">
+    <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="practice-tab" data-bs-toggle="tab" data-bs-target="#practice" type="button" role="tab" aria-controls="practice" aria-selected="true">
+            <i class="fas fa-file-alt me-2"></i>Practice Papers
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="mock-tab" data-bs-toggle="tab" data-bs-target="#mock" type="button" role="tab" aria-controls="mock" aria-selected="false">
+            <i class="fas fa-clock me-2"></i>Mock Exams
+        </button>
+    </li>
+</ul>
+
+<div class="tab-content" id="examTabsContent">
+    <!-- Practice Papers Tab -->
+    <div class="tab-pane fade show active" id="practice" role="tabpanel" aria-labelledby="practice-tab">
+        {% if practice_papers %}
+            <div class="row">
+                {% for paper in practice_papers %}
+                    <div class="col-md-4 mb-4">
+                        <div class="card h-100">
+                            <div class="card-header bg-dark d-flex justify-content-between align-items-center">
+                                <h5 class="card-title mb-0">{{ paper.name }}</h5>
+                                {% if paper.allowed_for_trial %}
+                                    <span class="badge bg-info">Trial</span>
+                                {% endif %}
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-2">
+                                    <strong>Course:</strong> {{ paper.course.name }}
+                                </div>
+                                <div class="mb-2">
+                                    <strong>Time Limit:</strong> {{ paper.time_limit }} minutes
+                                </div>
+                                <div class="mb-2">
+                                    <strong>Questions:</strong> {{ paper.questions.count }}
+                                </div>
+                                {% if paper.allowed_for_trial %}
+                                    <div class="mb-2">
+                                        <strong>Trial Questions:</strong> {{ paper.trial_question_count }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="card-footer bg-transparent">
+                                <a href="{% url 'start_exam' 'practice' paper.id %}" class="btn btn-primary w-100">
+                                    <i class="fas fa-play-circle me-2"></i>Start Practice
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i>No practice papers available for your courses.
+            </div>
+        {% endif %}
+    </div>
+    
+    <!-- Mock Exams Tab -->
+    <div class="tab-pane fade" id="mock" role="tabpanel" aria-labelledby="mock-tab">
+        {% if mock_exams %}
+            <div class="row">
+                {% for exam in mock_exams %}
+                    <div class="col-md-4 mb-4">
+                        <div class="card h-100">
+                            <div class="card-header bg-dark d-flex justify-content-between align-items-center">
+                                <h5 class="card-title mb-0">{{ exam.name }}</h5>
+                                {% if exam.results_released %}
+                                    <span class="badge bg-success">Results Released</span>
+                                {% else %}
+                                    <span class="badge bg-warning">Results Pending</span>
+                                {% endif %}
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-2">
+                                    <strong>Course:</strong> {{ exam.course.name }}
+                                </div>
+                                <div class="mb-2">
+                                    <strong>Time Limit:</strong> {{ exam.time_limit }} minutes
+                                </div>
+                                <div class="mb-2">
+                                    <strong>Questions:</strong> {{ exam.questions.count }}
+                                </div>
+                            </div>
+                            <div class="card-footer bg-transparent">
+                                <a href="{% url 'start_exam' 'mock' exam.id %}" class="btn btn-primary w-100">
+                                    <i class="fas fa-play-circle me-2"></i>Start Exam
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i>No mock exams available for your courses.
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}

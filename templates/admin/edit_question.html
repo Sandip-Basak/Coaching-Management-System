@@ -1,0 +1,274 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Update Question{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title text-center">Update Question</h3>
+                </div>
+                <div class="card-body">
+                    <form method="post" id="question-form">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.text.id_for_label }}" class="form-label">Question Text</label>
+                            {{ form.text }}
+                            {% if form.text.errors %}
+                                <div class="text-danger">
+                                    {{ form.text.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="{{ form.marks.id_for_label }}" class="form-label">Marks</label>
+                                {{ form.marks }}
+                                {% if form.marks.errors %}
+                                    <div class="text-danger">
+                                        {{ form.marks.errors }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-check form-switch mt-4">
+                                    {{ form.multiple_correct }}
+                                    <label class="form-check-label" for="{{ form.multiple_correct.id_for_label }}">
+                                        Multiple Correct Answers
+                                    </label>
+                                </div>
+                                {% if form.multiple_correct.errors %}
+                                    <div class="text-danger">
+                                        {{ form.multiple_correct.errors }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <hr>
+                        
+                        <h4 class="mb-3">Options</h4>
+                        <p class="text-muted mb-4">Add at least 2 options. Mark the correct answer(s).</p>
+                        
+                        {{ formset.management_form }}
+                        
+                        <div id="options-container">
+                            {% for option_form in formset %}
+                                <div class="option-form mb-3 p-3 border rounded">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <h6 class="mb-0">Option {{ forloop.counter }}</h6>
+                                        {% if not forloop.counter|divisibleby:1 %}
+                                            <button type="button" class="btn-close remove-option" aria-label="Remove Option"></button>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <div class="row align-items-center">
+                                        <div class="col-md-9">
+                                            {{ option_form.text.label_tag }}
+                                            {{ option_form.text }}
+                                            {% if option_form.text.errors %}
+                                                <div class="text-danger">
+                                                    {{ option_form.text.errors }}
+                                                </div>
+                                            {% endif %}
+                                            
+                                            {% for hidden_field in option_form.hidden_fields %}
+                                                {{ hidden_field }}
+                                            {% endfor %}
+                                        </div>
+                                        <div class="col-md-3 d-flex align-items-center justify-content-end mt-3">
+                                            <div class="form-check form-switch">
+                                                {{ option_form.is_correct }}
+                                                <label class="form-check-label" for="{{ option_form.is_correct.id_for_label }}">
+                                                    Correct Answer
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                        
+                        <div class="mb-4">
+                            <button type="button" id="add-option" class="btn btn-outline-primary">
+                                <i class="fas fa-plus-circle me-1"></i> Add Option
+                            </button>
+                        </div>
+                        
+                        <div class="alert alert-warning" id="validation-warning" style="display: none;">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            <span id="validation-message"></span>
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">Update Question</button>
+                            <a href="{% url 'question_list' %}" class="btn btn-outline-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_head %}
+<style>
+    /* Override form control styling for Bootstrap theme */
+    .form-control, .form-select {
+        padding: 0.5rem 0.75rem;
+    }
+    
+    textarea.form-control {
+        min-height: 100px;
+    }
+    
+    .option-form {
+        position: relative;
+        transition: all 0.3s ease;
+    }
+    
+    .option-form:hover {
+        background-color: rgba(255, 255, 255, 0.05);
+    }
+    
+    .remove-option {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+    }
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const optionsContainer = document.getElementById('options-container');
+        const addOptionBtn = document.getElementById('add-option');
+        const totalFormsInput = document.getElementById('id_options-TOTAL_FORMS');
+        const multipleChoiceCheckbox = document.getElementById('{{ form.multiple_correct.id_for_label }}');
+        const questionForm = document.getElementById('question-form');
+        const validationWarning = document.getElementById('validation-warning');
+        const validationMessage = document.getElementById('validation-message');
+
+        let formCount = parseInt(totalFormsInput.value);
+
+        // Enforce single selection when multiple correct is false
+        function enforceSingleSelection() {
+            const isMultiple = multipleChoiceCheckbox.checked;
+            const correctCheckboxes = document.querySelectorAll('[id^="id_options-"][id$="-is_correct"]');
+
+            correctCheckboxes.forEach(checkbox => {
+                checkbox.type = 'checkbox';
+                checkbox.name = checkbox.id.replace('id_', ''); // ensure Django field name
+
+                checkbox.onclick = null; // clear existing handlers
+
+                if (!isMultiple) {
+                    checkbox.onclick = function () {
+                        correctCheckboxes.forEach(cb => {
+                            if (cb !== checkbox) cb.checked = false;
+                        });
+                    };
+                }
+            });
+        }
+
+        // Add a new option block
+        addOptionBtn.addEventListener('click', function () {
+            const optionForm = document.createElement('div');
+            optionForm.className = 'option-form mb-3 p-3 border rounded';
+
+            const header = document.createElement('div');
+            header.className = 'd-flex justify-content-between align-items-start mb-2';
+            header.innerHTML = `
+                <h6 class="mb-0">Option ${formCount + 1}</h6>
+                <button type="button" class="btn-close remove-option" aria-label="Remove Option"></button>
+            `;
+
+            const content = document.createElement('div');
+            content.className = 'row align-items-center';
+            content.innerHTML = `
+                <div class="col-md-9">
+                    <label for="id_options-${formCount}-text" class="form-label">Text</label>
+                    <input type="text" name="options-${formCount}-text" id="id_options-${formCount}-text" class="form-control" required>
+                    <input type="hidden" name="options-${formCount}-id" id="id_options-${formCount}-id">
+                </div>
+                <div class="col-md-3 d-flex align-items-center justify-content-end mt-3">
+                    <div class="form-check form-switch">
+                        <input type="checkbox" name="options-${formCount}-is_correct" id="id_options-${formCount}-is_correct" class="form-check-input">
+                        <label class="form-check-label" for="id_options-${formCount}-is_correct">
+                            Correct Answer
+                        </label>
+                    </div>
+                </div>
+            `;
+
+            optionForm.appendChild(header);
+            optionForm.appendChild(content);
+            optionsContainer.appendChild(optionForm);
+
+            formCount++;
+            totalFormsInput.value = formCount;
+
+            // Bind remove event
+            optionForm.querySelector('.remove-option').addEventListener('click', function () {
+                optionForm.remove();
+                formCount--;
+                totalFormsInput.value = formCount;
+                updateOptionLabels();
+            });
+
+            enforceSingleSelection(); // Re-apply logic
+        });
+
+        // Update all option labels after removing
+        function updateOptionLabels() {
+            const optionForms = optionsContainer.querySelectorAll('.option-form');
+            optionForms.forEach((form, index) => {
+                form.querySelector('h6').textContent = `Option ${index + 1}`;
+            });
+        }
+
+        // Attach remove event to existing options
+        document.querySelectorAll('.remove-option').forEach(button => {
+            button.addEventListener('click', function () {
+                const optionForm = this.closest('.option-form');
+                optionForm.remove();
+                formCount--;
+                totalFormsInput.value = formCount;
+                updateOptionLabels();
+            });
+        });
+
+        multipleChoiceCheckbox.addEventListener('change', enforceSingleSelection);
+
+        questionForm.addEventListener('submit', function (e) {
+            if (formCount < 2) {
+                e.preventDefault();
+                validationMessage.textContent = 'At least two options are required.';
+                validationWarning.style.display = 'block';
+                return;
+            }
+
+            const correctOptions = optionsContainer.querySelectorAll('input[type="checkbox"]:checked');
+            if (correctOptions.length === 0) {
+                e.preventDefault();
+                validationMessage.textContent = 'At least one option must be marked as correct.';
+                validationWarning.style.display = 'block';
+                return;
+            }
+
+            validationWarning.style.display = 'none';
+        });
+
+        // Initialize
+        enforceSingleSelection();
+    });
+</script>
+{% endblock %}

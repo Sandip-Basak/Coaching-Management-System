@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+
+{% block title %}Coaching Management System - Home{% endblock %}
+
+{% block content %}
+<div class="row align-items-center">
+    <div class="col-md-6">
+        <h1 class="display-4 mb-4">Comprehensive Coaching Management Platform</h1>
+        <p class="lead">
+            A complete solution for coaching institutes to manage courses, students, exams, and more.
+        </p>
+        <ul class="list-unstyled feature-list">
+            <li><i data-feather="check" class="icon-success"></i> Course Management</li>
+            <li><i data-feather="check" class="icon-success"></i> Student Administration</li>
+            <li><i data-feather="check" class="icon-success"></i> Practice Papers & Mock Exams</li>
+            <li><i data-feather="check" class="icon-success"></i> Advanced Proctoring Features</li>
+            <li><i data-feather="check" class="icon-success"></i> AI Question Generation</li>
+        </ul>
+        <div class="mt-4">
+            <a href="{{ url_for('signup') }}" class="btn btn-primary me-2">Get Started</a>
+            <a href="{{ url_for('login') }}" class="btn btn-outline-secondary">Log In</a>
+        </div>
+    </div>
+    <div class="col-md-6 d-flex justify-content-center">
+        <div class="image-container mt-4 mt-md-0">
+            <svg width="400" height="300" viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg">
+                <!-- Learning illustration -->
+                <rect x="150" y="100" width="500" height="350" rx="10" fill="#2a2d3e" stroke="#6c757d" stroke-width="2"/>
+                <rect x="180" y="130" width="440" height="290" rx="5" fill="#1e1e2d"/>
+                
+                <!-- Computer screen elements -->
+                <rect x="200" y="150" width="400" height="30" rx="3" fill="#495057"/>
+                <circle cx="215" cy="165" r="5" fill="#ff6b6b"/>
+                <circle cx="235" cy="165" r="5" fill="#ffd93d"/>
+                <circle cx="255" cy="165" r="5" fill="#6bd490"/>
+                
+                <!-- Data visualization -->
+                <rect x="210" y="200" width="380" height="200" rx="3" fill="#1a1a2e"/>
+                
+                <!-- Chart elements -->
+                <rect x="230" y="320" width="40" height="60" fill="#4361ee" opacity="0.8"/>
+                <rect x="290" y="290" width="40" height="90" fill="#4cc9f0" opacity="0.8"/>
+                <rect x="350" y="260" width="40" height="120" fill="#4895ef" opacity="0.8"/>
+                <rect x="410" y="220" width="40" height="160" fill="#3f37c9" opacity="0.8"/>
+                <rect x="470" y="280" width="40" height="100" fill="#4cc9f0" opacity="0.8"/>
+                <rect x="530" y="240" width="40" height="140" fill="#4361ee" opacity="0.8"/>
+                
+                <!-- Figure studying -->
+                <circle cx="650" cy="450" r="50" fill="#495057"/>
+                <rect x="625" y="500" width="50" height="60" rx="5" fill="#495057"/>
+                <line x1="650" y1="550" x2="620" y2="590" stroke="#495057" stroke-width="10" stroke-linecap="round"/>
+                <line x1="650" y1="550" x2="680" y2="590" stroke="#495057" stroke-width="10" stroke-linecap="round"/>
+                <line x1="625" y1="510" x2="585" y2="490" stroke="#495057" stroke-width="10" stroke-linecap="round"/>
+                <line x1="675" y1="510" x2="715" y2="490" stroke="#495057" stroke-width="10" stroke-linecap="round"/>
+                
+                <!-- Books -->
+                <rect x="500" y="520" width="80" height="20" rx="2" fill="#6c757d"/>
+                <rect x="510" y="500" width="80" height="20" rx="2" fill="#495057"/>
+                <rect x="520" y="480" width="80" height="20" rx="2" fill="#6c757d"/>
+            </svg>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-5">
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i data-feather="book" class="feature-icon mb-3"></i>
+                <h3 class="card-title">Comprehensive Course Management</h3>
+                <p class="card-text">Organize courses, create batches, and manage study materials in one place.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i data-feather="users" class="feature-icon mb-3"></i>
+                <h3 class="card-title">Student Administration</h3>
+                <p class="card-text">Manage student registrations, approvals, batch assignments, and progress tracking.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i data-feather="clipboard" class="feature-icon mb-3"></i>
+                <h3 class="card-title">Advanced Assessment System</h3>
+                <p class="card-text">Create practice papers and conduct mock exams with proctoring features.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_head %}
+<style>
+    .feature-icon {
+        width: 40px;
+        height: 40px;
+        color: var(--bs-info);
+    }
+    
+    .icon-success {
+        width: 20px;
+        height: 20px;
+        color: var(--bs-success);
+        margin-right: 10px;
+    }
+    
+    .feature-list li {
+        margin-bottom: 10px;
+    }
+    
+    .image-container {
+        max-width: 100%;
+        height: auto;
+    }
+</style>
+{% endblock %}

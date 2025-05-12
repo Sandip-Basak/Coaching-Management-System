@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+
+{% block title %}Pending Approval - Coaching Management System{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card text-center">
+            <div class="card-body">
+                <div class="mb-4">
+                    <i data-feather="clock" style="width: 64px; height: 64px; color: var(--bs-warning);"></i>
+                </div>
+                <h3 class="card-title">Your Account is Pending Approval</h3>
+                <p class="card-text">
+                    Thank you for signing up! Your account is currently waiting for administrator approval.
+                    Once approved, you'll have full access to the coaching platform.
+                </p>
+                <div class="mt-4">
+                    <p>What happens next?</p>
+                    <ol class="text-start">
+                        <li>An administrator will review your application</li>
+                        <li>Once approved, you'll receive access to your dashboard</li>
+                        <li>You'll be able to access course materials, practice papers, and mock exams</li>
+                    </ol>
+                </div>
+                <div class="alert alert-info mt-4">
+                    <p class="mb-0">Please check back later or contact the administrator if your approval is taking too long.</p>
+                </div>
+                <a href="{{ url_for('logout') }}" class="btn btn-primary mt-3">Logout</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
