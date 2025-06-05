@@ -85,10 +85,15 @@
                         <div class="card h-100">
                             <div class="card-header bg-dark d-flex justify-content-between align-items-center">
                                 <h5 class="card-title mb-0">{{ exam.name }}</h5>
-                                {% if exam.results_released %}
+                                <!-- {% if exam.results_released %}
                                     <span class="badge bg-success">Results Released</span>
                                 {% else %}
                                     <span class="badge bg-warning">Results Pending</span>
+                                {% endif %} -->
+                                {% if exam.results_released %}
+                                <a href="{% url 'hide_exam_results' mock_exam_id=exam.id %}" class="btn btn-sm btn-success">Hide Results</a>
+                                {% else %}
+                                <a href="{% url 'release_exam_results' mock_exam_id=exam.id %}" class="btn btn-sm btn-warning">Release Results</a>
                                 {% endif %}
                             </div>
                             <div class="card-body">

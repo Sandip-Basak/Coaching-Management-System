@@ -444,6 +444,33 @@ def create_mock_exam(request):
     
     return render(request, 'exams/create_mock_exam.html', {'form': form})
 
+@login_required
+def release_exam_results(request, mock_exam_id):
+    """Release results for a specific mock exam (Admin/Staff only)"""
+    if not request.user.is_admin_staff and not request.user.is_staff:
+        return HttpResponseForbidden("You do not have permission to perform this action.")
+
+    mock_exam = get_object_or_404(MockExam, id=mock_exam_id)
+    mock_exam.results_released = True
+    mock_exam.save()
+
+    messages.success(request, f"Results for Mock Exam '{mock_exam.name}' have been released.")
+    return redirect("/exams")
+
+@login_required
+def hide_exam_results(request, mock_exam_id):
+    """Hide results for a mock exam (set results_released to False)"""
+    if not request.user.is_admin_staff and not request.user.is_staff:
+        return HttpResponseForbidden("You do not have permission to hide exam results.")
+ 
+    mock_exam = get_object_or_404(MockExam, id=mock_exam_id)
+    mock_exam.results_released = False
+    mock_exam.save()
+    
+    messages.success(request, f"Results for Mock Exam '{mock_exam.name}' have been hidden.")
+    # Redirect to the admin change list for MockExam
+    return redirect("/exams")
+
 
 def start_trial_exam(request, paper_id):
     """Start a trial practice paper for non-authenticated users"""
@@ -559,17 +586,21 @@ def submit_exam(request):
         
         attempt = get_object_or_404(Attempt, id=attempt_id, user=None, is_trial=True)
     
-    # Parse answers from the form
+    # Parse answers from the form using getlist to handle multiple selections
     answers_data = {}
-    for key, value in request.POST.items():
-        if key.startswith('question_'):
-            question_id = key.replace('question_', '')
-            
-            # Handle multiple selection (checkboxes)
-            if isinstance(value, list):
-                answers_data[question_id] = value
-            else:
-                answers_data[question_id] = [value]
+    
+    # Extract all question keys from the POST data
+    question_keys = [key for key in request.POST.keys() if key.startswith('question_')]
+    
+    # Process each question
+    for key in question_keys:
+        question_id = key.replace('question_', '')
+        # Use getlist to get all selected options for this question
+        selected_options = request.POST.getlist(key)
+        answers_data[question_id] = selected_options
+        
+        # Debug output for verification
+        # print(f"Question {question_id} selections: {selected_options}")
     
     # Save answers
     for question_id, option_ids in answers_data.items():
@@ -579,6 +610,7 @@ def submit_exam(request):
             question=question
         )
         
+        # Add all selected options for this question
         for option_id in option_ids:
             option = get_object_or_404(Option, id=option_id)
             answer.selected_options.add(option)

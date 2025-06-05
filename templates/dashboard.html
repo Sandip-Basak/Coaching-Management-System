@@ -12,7 +12,26 @@
         </div>
     </div>
 </div>
-
+<!-- <div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <div class="mb-3">
+                    {% if user.student_profile.profile_photo %}
+                        <img src="{{ user.student_profile.profile_photo }}" alt="Profile Photo" class="img-fluid rounded-circle profile-img">
+                    {% else %}
+                        <div class="profile-placeholder">
+                            <i data-feather="user" class="profile-icon"></i>
+                        </div>
+                    {% endif %}
+                </div>
+                <h4>{{ user.first_name }} {{ user.last_name }}</h4>
+                <p class="text-muted">@{{ user.username }}</p>
+                <p>{{ user.email }}</p>
+                <a href="#" class="btn btn-sm btn-outline-primary">Edit Profile</a>
+            </div>
+        </div>
+    </div> -->
 <div class="row mb-4">
     <div class="col-md-4">
         <div class="card h-100">

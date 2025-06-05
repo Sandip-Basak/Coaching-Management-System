@@ -2,7 +2,7 @@
 let endTime;
 let timerInterval;
 let warningCount = 0;
-let maxWarnings = 3; // Maximum number of warnings before auto-submit
+let maxWarnings = 50; // Maximum number of warnings before auto-submit
 let isFullscreen = false;
 let questionCount = 0;
 let answeredCount = 0;

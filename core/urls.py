@@ -36,6 +36,8 @@ urlpatterns = [
     path('exams/start/<str:exam_type>/<int:exam_id>/', views.start_exam, name='start_exam'),
     path('exams/submit/', views.submit_exam, name='submit_exam'),
     path('exams/results/<int:attempt_id>/', views.exam_results, name='exam_results'),
+    path('exams/<int:mock_exam_id>/release_results/', views.release_exam_results, name='release_exam_results'),
+    path('exams/<int:mock_exam_id>/hide_results/', views.hide_exam_results, name='hide_exam_results'),
     path('exams/trial/results/<int:attempt_id>/', views.trial_results, name='trial_results'),
     path('exams/warning/<int:attempt_id>/', views.report_warning, name='report_warning'),
     

@@ -2,7 +2,7 @@
 
 {% block title %}{{ paper.name }} - Coaching Management System{% endblock %}
 
-{% block extra_css %}
+{% block extra_head %}
 <style>
     .timer-container {
         position: sticky;
@@ -41,7 +41,7 @@
     
     .answered {
         background-color: var(--bs-success);
-        color: white;
+        color: rgb(255, 255, 255);
     }
     
     .current {
@@ -249,6 +249,9 @@
     </div>
 </div>
 
+{% endblock %}
+
+{% block scripts %}
 <script src="/static/js/exam.js"></script>
 <script>;
 document.addEventListener('DOMContentLoaded', function() {
@@ -256,9 +259,5 @@ document.addEventListener('DOMContentLoaded', function() {
     initExamEnvironment('{{ attempt.id }}', '{% url "report_warning" attempt.id %}');
 });
 </script>
-
-{% endblock %}
-
-{% block extra_js %}
 
 {% endblock %}
