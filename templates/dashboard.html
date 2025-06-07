@@ -166,9 +166,13 @@
                                         <td>{{ attempt.start_time|date:"M d, Y" }}</td>
                                         <td>
                                             {% if attempt.score != None %}
-                                                {{ attempt.score|floatformat:2 }}%
+                                                {% if attempt.attempt_type == 'practice' or attempt.mock_exam.results_released %}
+                                                    {{ attempt.score|floatformat:2 }}%
+                                                {% else %}
+                                                    --
+                                                {% endif %}
                                             {% else %}
-                                                -
+                                                    --
                                             {% endif %}
                                         </td>
                                         <td>

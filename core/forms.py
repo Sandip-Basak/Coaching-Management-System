@@ -138,6 +138,11 @@ class AIQuestionsForm(forms.Form):
         initial=10,
         help_text='How many questions to generate (1-50)'
     )
+    course = forms.ModelChoiceField(
+        queryset=Course.objects.all(), # Allow selecting any existing course
+        label='Select Course',
+        empty_label='--- Select a Course ---' # Optional: Add a placeholder option
+    )
 
 
 class CourseMaterialForm(forms.ModelForm):

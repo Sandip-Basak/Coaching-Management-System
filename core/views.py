@@ -46,13 +46,6 @@ def signup_view(request):
         form = SignUpForm(request.POST, request.FILES)
         if form.is_valid():
             user = form.save()
-            # Create student profile
-            # profile = StudentProfile.objects.create(
-            #     user = new_user,
-            #     profile_photo=form.cleaned_data.get('profile_photo')
-            # )
-            # messages.success(request, 'Account created successfully! Please wait for admin approval.')
-            # return redirect('login')
             if StudentProfile.objects.filter(user=user).exists():
                 profile = StudentProfile.objects.get(user=user)
                 profile.profile_photo=form.cleaned_data.get('profile_photo')
@@ -865,75 +858,6 @@ def profile_edit(request):
     return render(request, 'profile/edit.html', {'form': form})
 
 
-# @login_required
-# def import_questions(request):
-#     """Import questions from Excel file"""
-#     if not request.user.is_admin_staff and not request.user.is_staff:
-#         return HttpResponseForbidden("You do not have permission to import questions.")
-    
-#     if request.method == 'POST':
-#         form = ImportQuestionsForm(request.POST, request.FILES)
-#         if form.is_valid():
-#             excel_file = request.FILES['excel_file']
-            
-#             try:
-#                 # Read Excel file
-#                 df = pd.read_excel(excel_file)
-                
-#                 # Validate columns
-#                 required_columns = ['Question', 'Option A', 'Option B', 'Option C', 'Option D', 'Correct Options', 'Marks']
-#                 for column in required_columns:
-#                     if column not in df.columns:
-#                         messages.error(request, f"Missing column: {column}")
-#                         return render(request, 'admin/import_questions.html', {'form': form})
-                
-#                 # Process each row
-#                 questions_created = 0
-                
-#                 for _, row in df.iterrows():
-#                     question_text = row['Question']
-#                     marks = int(row['Marks'])
-                    
-#                     # Parse correct options
-#                     correct_options = str(row['Correct Options']).split(',')
-#                     correct_options = [opt.strip() for opt in correct_options]
-                    
-#                     # Create question
-#                     question = Question.objects.create(
-#                         text=question_text,
-#                         marks=marks,
-#                         multiple_correct=len(correct_options) > 1
-#                     )
-                    
-#                     # Create options
-#                     option_mapping = {
-#                         'A': row['Option A'],
-#                         'B': row['Option B'],
-#                         'C': row['Option C'],
-#                         'D': row['Option D'],
-#                     }
-                    
-#                     for key, text in option_mapping.items():
-#                         is_correct = key in correct_options
-#                         Option.objects.create(
-#                             question=question,
-#                             text=text,
-#                             is_correct=is_correct
-#                         )
-                    
-#                     questions_created += 1
-                
-#                 messages.success(request, f"Successfully imported {questions_created} questions.")
-#                 return redirect('admin_dashboard')
-                
-#             except Exception as e:
-#                 messages.error(request, f"Error importing questions: {str(e)}")
-#     else:
-#         form = ImportQuestionsForm()
-    
-#     return render(request, 'admin/import_questions.html', {'form': form})
-
-
 @login_required
 def import_questions(request):
     """Import questions from Excel file"""
@@ -1005,17 +929,6 @@ def import_questions(request):
     return render(request, 'admin/import_questions.html', {'form': form})
 
 
-
-
-
-
-
-
-
-
-
-
-
 @login_required
 def ai_questions(request):
     """Generate questions using AI from PDF content"""
@@ -1027,6 +940,7 @@ def ai_questions(request):
         if form.is_valid():
             pdf_file = request.FILES['pdf_file']
             num_questions = form.cleaned_data['num_questions']
+            selected_course = form.cleaned_data['course'] # Get the selected course
             
             try:
                 # Save PDF temporarily
@@ -1046,6 +960,7 @@ def ai_questions(request):
                 for q_data in questions_data:
                     # Create question
                     question = Question.objects.create(
+                        course=selected_course,
                         text=q_data['question'],
                         marks=q_data['marks'],
                         multiple_correct=len(q_data['correct_options']) > 1

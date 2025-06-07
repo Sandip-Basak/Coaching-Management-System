@@ -119,7 +119,7 @@ def generate_ai_questions(pdf_path, num_questions):
         }
     }
     
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key={api_key}"
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={api_key}"
     response = requests.post(url, headers=headers, json=data)
     
     if response.status_code != 200:
