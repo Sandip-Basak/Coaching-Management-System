@@ -124,4 +124,4 @@ SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_AGE = 86400  # 24 hours
 
 # Google Gemini API Key
-GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY', 'AIzaSyBCWBIc6EQz8slv6a_G3dOj0ra8bL4gYns')
+GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY', 'YOUR API KEY')
