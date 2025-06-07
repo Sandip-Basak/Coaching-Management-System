@@ -75,7 +75,7 @@
                             </div>
                         </div>
                         
-                        <div class="mb-3">
+                        <!-- <div class="mb-3">
                             <label for="{{ form.questions.id_for_label }}" class="form-label">Questions</label>
                             {{ form.questions }}
                             <div class="form-text">Hold Ctrl/Cmd to select multiple questions</div>
@@ -89,7 +89,31 @@
                                 <span>Selected: <span id="questionCount">0</span> questions</span>
                                 <span>Total Marks: <span id="totalMarks">0</span></span>
                             </div>
+                        </div> -->
+
+
+
+                        <div class="mb-3">
+                            <label for="{{ form.questions.id_for_label }}" class="form-label">Questions</label>
+                            <select name="{{ form.questions.name }}" id="id_questions" multiple>
+                                {% for question in form.questions.field.queryset %}
+                                    <option value="{{ question.id }}" data-course-id="{{ question.course.id }}">{{ question.text }}</option>
+                                {% endfor %}
+                            </select>
+                            <div class="form-text">Hold Ctrl/Cmd to select multiple questions</div>
+                            {% if form.questions.errors %}
+                                <div class="text-danger">
+                                    {{ form.questions.errors }}
+                                </div>
+                            {% endif %}
+                            
+                            <div class="d-flex justify-content-between mt-2">
+                                <span>Selected: <span id="questionCount">0</span> questions</span>
+                                <span>Total Marks: <span id="totalMarks">0</span></span>
+                            </div>
                         </div>
+
+
                         
                         <div class="d-grid gap-2">
                             <button type="submit" class="btn btn-primary">Create Practice Paper</button>
@@ -161,4 +185,88 @@
         updateQuestionStats(); // Initialize
     });
 </script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Toggle trial settings (keep your existing code here)
+        const allowTrialCheckbox = document.getElementById('{{ form.allowed_for_trial.id_for_label }}');
+        const trialSettingsContainer = document.getElementById('trialSettingsContainer');
+        
+        function toggleTrialSettings() {
+            trialSettingsContainer.style.display = allowTrialCheckbox.checked ? 'block' : 'none';
+        }
+        
+        allowTrialCheckbox.addEventListener('change', toggleTrialSettings);
+        toggleTrialSettings(); // Initialize
+        
+        // Track selected question count and total marks (keep your existing code here)
+        const questionsSelect = document.getElementById('id_questions');
+        const questionCountDisplay = document.getElementById('questionCount');
+        const totalMarksDisplay = document.getElementById('totalMarks');
+        const courseSelect = document.getElementById('id_course'); // Get the course select element
+
+        // Assuming questionData is available globally or can be fetched
+        const questionData = {
+            {% for question in question_data %}
+                "{{ question.id }}": { marks: {{ question.marks }} }{% if not forloop.last %},{% endif %}\n            {% endfor %}
+        };
+        
+        function updateQuestionStats() {
+            const selectedCount = questionsSelect.selectedOptions.length;
+            questionCountDisplay.textContent = selectedCount;
+            
+            let totalMarks = 0;
+            for (let i = 0; i < questionsSelect.selectedOptions.length; i++) {
+                const questionId = questionsSelect.selectedOptions[i].value;
+                if (questionData[questionId]) {
+                    totalMarks += questionData[questionId].marks;
+                }
+            }
+            
+            totalMarksDisplay.textContent = totalMarks;
+        }
+        
+        questionsSelect.addEventListener('change', updateQuestionStats);
+        // updateQuestionStats(); // Initialize - removed as questions will be loaded based on course
+
+        // --- Client-side filtering of questions ---
+        courseSelect.addEventListener('change', function() {
+            const selectedCourseId = this.value; // Get the selected course ID
+
+            // Iterate through each question option
+            questionsSelect.querySelectorAll('option').forEach(option => {
+                const questionCourseId = option.dataset.courseId; // Get the course ID from the data attribute
+
+                if (selectedCourseId === '' || questionCourseId === selectedCourseId) {
+                    // If no course is selected or the question belongs to the selected course, show it
+                    option.style.display = ''; // Or 'block'
+                } else {
+                    // Otherwise, hide the option
+                    option.style.display = 'none';
+                }
+            });
+
+            // Deselect any previously selected questions that are now hidden
+            for (let i = 0; i < questionsSelect.options.length; i++) {
+                const option = questionsSelect.options[i];
+                if (option.selected && option.style.display === 'none') {
+                    option.selected = false;
+                }
+            }
+
+            // Update the question stats after filtering and deselecting
+            updateQuestionStats();
+        });
+
+        // Trigger change event on page load if a course is already selected
+        if (courseSelect.value) {
+            courseSelect.dispatchEvent(new Event('change'));
+        } else {
+             // If no course is selected on load, hide all questions initially
+             questionsSelect.querySelectorAll('option').forEach(option => {
+                 option.style.display = 'none';
+             });
+        }
+    });
+</script>
 {% endblock %}
+

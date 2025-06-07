@@ -44,6 +44,7 @@ urlpatterns = [
     # Materials
     path('materials/', views.materials_list, name='materials_list'),
     path('materials/upload/', views.upload_material, name='upload_material'),
+    path('media/course_materials/<str:material_id>/', views.serve_course_material, name='serve_course_material'),
     
     # Admin
     path('admin/dashboard/', views.admin_dashboard, name='admin_dashboard'),

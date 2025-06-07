@@ -72,7 +72,7 @@ class QuestionForm(forms.ModelForm):
     """Form for creating/editing questions"""
     class Meta:
         model = Question
-        fields = ('text', 'marks', 'multiple_correct')
+        fields = ('course', 'text', 'marks', 'multiple_correct')
         widgets = {
             'text': forms.Textarea(attrs={'rows': 3}),
         }
@@ -120,6 +120,11 @@ class ImportQuestionsForm(forms.Form):
     excel_file = forms.FileField(
         label='Select Excel File',
         help_text='Excel file must have columns: Question, Option A-D, Correct Options (comma-separated), Marks'
+    )
+    course = forms.ModelChoiceField(
+        queryset=Course.objects.all(), # Allow selecting any existing course
+        label='Select Course',
+        empty_label='--- Select a Course ---' # Optional: Add a placeholder option
     )
 
 

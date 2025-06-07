@@ -4,9 +4,9 @@ import random
 import pandas as pd
 from datetime import datetime, timedelta
 from django.shortcuts import render, redirect, get_object_or_404
-from django.http import JsonResponse, HttpResponseForbidden
+from django.http import JsonResponse, HttpResponseForbidden, HttpResponse
 from django.contrib.auth import login, logout
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.db.models import Q
 from django.utils import timezone
 from django.urls import reverse
@@ -14,6 +14,7 @@ from django.contrib import messages
 from django.views.decorators.http import require_POST
 from django.core.paginator import Paginator
 import uuid
+import mimetypes
 
 from .models import (
     User, StudentProfile, Course, Batch, Question, Option,
@@ -46,12 +47,25 @@ def signup_view(request):
         if form.is_valid():
             user = form.save()
             # Create student profile
-            profile = StudentProfile.objects.create(
-                user=user,
-                profile_photo=form.cleaned_data.get('profile_photo')
-            )
-            messages.success(request, 'Account created successfully! Please wait for admin approval.')
-            return redirect('login')
+            # profile = StudentProfile.objects.create(
+            #     user = new_user,
+            #     profile_photo=form.cleaned_data.get('profile_photo')
+            # )
+            # messages.success(request, 'Account created successfully! Please wait for admin approval.')
+            # return redirect('login')
+            if StudentProfile.objects.filter(user=user).exists():
+                profile = StudentProfile.objects.get(user=user)
+                profile.profile_photo=form.cleaned_data.get('profile_photo')
+                profile.save()
+                return redirect('signup') # Or render the form again with the error message
+            else:
+                # Create student profile
+                profile = StudentProfile.objects.create(
+                    user=user,
+                    profile_photo=form.cleaned_data.get('profile_photo')
+                )
+                messages.success(request, 'Account created successfully! Please wait for admin approval.')
+                return redirect('login')
     else:
         form = SignUpForm()
     
@@ -851,46 +865,117 @@ def profile_edit(request):
     return render(request, 'profile/edit.html', {'form': form})
 
 
+# @login_required
+# def import_questions(request):
+#     """Import questions from Excel file"""
+#     if not request.user.is_admin_staff and not request.user.is_staff:
+#         return HttpResponseForbidden("You do not have permission to import questions.")
+    
+#     if request.method == 'POST':
+#         form = ImportQuestionsForm(request.POST, request.FILES)
+#         if form.is_valid():
+#             excel_file = request.FILES['excel_file']
+            
+#             try:
+#                 # Read Excel file
+#                 df = pd.read_excel(excel_file)
+                
+#                 # Validate columns
+#                 required_columns = ['Question', 'Option A', 'Option B', 'Option C', 'Option D', 'Correct Options', 'Marks']
+#                 for column in required_columns:
+#                     if column not in df.columns:
+#                         messages.error(request, f"Missing column: {column}")
+#                         return render(request, 'admin/import_questions.html', {'form': form})
+                
+#                 # Process each row
+#                 questions_created = 0
+                
+#                 for _, row in df.iterrows():
+#                     question_text = row['Question']
+#                     marks = int(row['Marks'])
+                    
+#                     # Parse correct options
+#                     correct_options = str(row['Correct Options']).split(',')
+#                     correct_options = [opt.strip() for opt in correct_options]
+                    
+#                     # Create question
+#                     question = Question.objects.create(
+#                         text=question_text,
+#                         marks=marks,
+#                         multiple_correct=len(correct_options) > 1
+#                     )
+                    
+#                     # Create options
+#                     option_mapping = {
+#                         'A': row['Option A'],
+#                         'B': row['Option B'],
+#                         'C': row['Option C'],
+#                         'D': row['Option D'],
+#                     }
+                    
+#                     for key, text in option_mapping.items():
+#                         is_correct = key in correct_options
+#                         Option.objects.create(
+#                             question=question,
+#                             text=text,
+#                             is_correct=is_correct
+#                         )
+                    
+#                     questions_created += 1
+                
+#                 messages.success(request, f"Successfully imported {questions_created} questions.")
+#                 return redirect('admin_dashboard')
+                
+#             except Exception as e:
+#                 messages.error(request, f"Error importing questions: {str(e)}")
+#     else:
+#         form = ImportQuestionsForm()
+    
+#     return render(request, 'admin/import_questions.html', {'form': form})
+
+
 @login_required
 def import_questions(request):
     """Import questions from Excel file"""
     if not request.user.is_admin_staff and not request.user.is_staff:
         return HttpResponseForbidden("You do not have permission to import questions.")
-    
+
     if request.method == 'POST':
         form = ImportQuestionsForm(request.POST, request.FILES)
         if form.is_valid():
             excel_file = request.FILES['excel_file']
-            
+            selected_course = form.cleaned_data['course'] # Get the selected course
+
             try:
                 # Read Excel file
                 df = pd.read_excel(excel_file)
-                
+
                 # Validate columns
                 required_columns = ['Question', 'Option A', 'Option B', 'Option C', 'Option D', 'Correct Options', 'Marks']
                 for column in required_columns:
                     if column not in df.columns:
                         messages.error(request, f"Missing column: {column}")
                         return render(request, 'admin/import_questions.html', {'form': form})
-                
+
                 # Process each row
                 questions_created = 0
-                
+
                 for _, row in df.iterrows():
                     question_text = row['Question']
                     marks = int(row['Marks'])
-                    
+
                     # Parse correct options
                     correct_options = str(row['Correct Options']).split(',')
                     correct_options = [opt.strip() for opt in correct_options]
-                    
+
                     # Create question
                     question = Question.objects.create(
+                        course=selected_course, # Assign the selected course
                         text=question_text,
                         marks=marks,
                         multiple_correct=len(correct_options) > 1
                     )
-                    
+
                     # Create options
                     option_mapping = {
                         'A': row['Option A'],
@@ -898,7 +983,7 @@ def import_questions(request):
                         'C': row['Option C'],
                         'D': row['Option D'],
                     }
-                    
+
                     for key, text in option_mapping.items():
                         is_correct = key in correct_options
                         Option.objects.create(
@@ -906,18 +991,29 @@ def import_questions(request):
                             text=text,
                             is_correct=is_correct
                         )
-                    
+
                     questions_created += 1
-                
+
                 messages.success(request, f"Successfully imported {questions_created} questions.")
                 return redirect('admin_dashboard')
-                
+
             except Exception as e:
                 messages.error(request, f"Error importing questions: {str(e)}")
     else:
         form = ImportQuestionsForm()
-    
+
     return render(request, 'admin/import_questions.html', {'form': form})
+
+
+
+
+
+
+
+
+
+
+
 
 
 @login_required
@@ -1048,3 +1144,33 @@ def edit_question(request, id):
         formset = OptionFormSet(instance=question, prefix='options')
     
     return render(request, 'admin/edit_question.html', {'form': form, 'formset': formset, 'question': question})
+
+
+
+
+@login_required
+def serve_course_material(request, material_id):
+    """Serve course material file with access control"""
+    material = get_object_or_404(CourseMaterial, file=f"course_materials/{material_id}")
+    user = request.user
+
+    # Check if user is admin/staff
+    if user.is_admin_staff or user.is_staff:
+        can_access = True
+    # Check if user is a student in the associated batch
+    elif hasattr(user, 'student_profile'):
+        can_access = user.student_profile.batches.filter(id=material.batch.id).exists()
+    else:
+        can_access = False
+
+    if not can_access:
+        return HttpResponseForbidden("You do not have permission to access this material.")
+
+    if material.file:
+        file_path = material.file.path
+        # Guess the content type based on the file name
+        content_type, encoding = mimetypes.guess_type(file_path)
+        content_type = content_type if content_type else 'application/octet-stream' # Default if type cannot be guessed
+        response = HttpResponse(open(file_path, 'rb').read(), content_type=content_type)
+        response['Content-Disposition'] = f'attachment; filename="{os.path.basename(file_path)}"'
+        return response

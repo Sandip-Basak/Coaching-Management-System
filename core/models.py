@@ -4,6 +4,22 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.utils.text import slugify
 from django.core.validators import MinValueValidator, MaxValueValidator
+import uuid
+from django.db.models.signals import pre_delete
+from django.dispatch import receiver
+import os
+
+
+
+def image_id(instance, filename):
+    extension = filename.split('.')[-1]  # Get file extension
+    unique_filename = f"{uuid.uuid4().hex}.{extension}"
+    return f"profile_photos/{unique_filename}"
+
+def material_id(instance, filename):
+    extension = filename.split('.')[-1]  # Get file extension
+    unique_filename = f"{uuid.uuid4().hex}.{extension}"
+    return f"course_materials/{unique_filename}"
 
 
 class User(AbstractUser):
@@ -19,12 +35,27 @@ class StudentProfile(models.Model):
     """Student profile extending the User model"""
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='student_profile')
     approved = models.BooleanField(default=False)
-    profile_photo = models.ImageField(upload_to='profile_photos/', null=True, blank=True)
+    profile_photo = models.ImageField(upload_to=image_id, null=True, blank=True)
     device_identifier = models.CharField(max_length=255, null=True, blank=True)
     session_token = models.UUIDField(default=uuid.uuid4, editable=False)
     
     def __str__(self):
         return f"{self.user.username}'s Profile"
+    
+    def delete(self, *args, **kwargs):
+        # Delete the image file from the media folder before deleting the database entry
+        if self.profile_photo:
+            if os.path.isfile(self.profile_photo.path):
+                os.remove(self.profile_photo.path)
+        super().delete(*args, **kwargs)
+
+# Signal to delete image file when a Picture instance is deleted
+@receiver(pre_delete, sender=StudentProfile)
+def delete_picture_file(sender, instance, **kwargs):
+    if instance.profile_photo:
+        if os.path.isfile(instance.profile_photo.path):
+            os.remove(instance.profile_photo.path)
+
 
 
 class Course(models.Model):
@@ -56,10 +87,20 @@ class Batch(models.Model):
     
     def __str__(self):
         return f"{self.name} - {self.course.name}"
+    
+
+@receiver(pre_delete, sender=Batch)
+def delete_batch_course_materials(sender, instance, **kwargs):
+    """Deletes course materials when a batch is deleted."""
+    for material in instance.materials.all():
+        if material.file:
+            if os.path.isfile(material.file.path):
+                os.remove(material.file.path)
 
 
 class Question(models.Model):
     """Question model"""
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='questions', null=True, blank=True)
     text = models.TextField()
     marks = models.IntegerField(default=1)
     multiple_correct = models.BooleanField(default=False)
@@ -162,7 +203,7 @@ class CourseMaterial(models.Model):
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True, null=True)
     material_type = models.CharField(max_length=10, choices=TYPE_CHOICES)
-    file = models.FileField(upload_to='course_materials/', null=True, blank=True)
+    file = models.FileField(upload_to=material_id, null=True, blank=True)
     video_embed_code = models.TextField(null=True, blank=True)
     batch = models.ForeignKey(Batch, on_delete=models.CASCADE, related_name='materials')
     uploaded_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='uploaded_materials')
@@ -170,3 +211,10 @@ class CourseMaterial(models.Model):
     
     def __str__(self):
         return f"{self.title} - {self.batch.name}"
+    
+    def delete(self, *args, **kwargs):
+        # Delete the image file from the media folder before deleting the database entry
+        if self.file:
+            if os.path.isfile(self.file.path):
+                os.remove(self.file.path)
+        super().delete(*args, **kwargs)
