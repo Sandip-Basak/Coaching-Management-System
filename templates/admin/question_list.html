@@ -21,7 +21,7 @@
     </div>
 
     <!-- Filter and Search -->
-    <div class="card mb-4">
+    <!-- <div class="card mb-4">
         <div class="card-body">
             <form method="get" class="row g-3">
                 <div class="col-md-6">
@@ -52,7 +52,7 @@
                 </div>
             </form>
         </div>
-    </div>
+    </div> -->
 
     <!-- Questions List -->
     <div class="card">
@@ -93,7 +93,7 @@
                                     <span class="badge bg-warning">{{ question.mock_exams.count }} Exams</span>
                                 </td>
                                 <td>
-                                    <a href="{% url 'edit_question' question.id %}" class="btn btn-sm btn-outline-primary" data-bs-toggle="tooltip" title="Edit">
+                                    <a href="{% url 'edit_question' question.id %}" class="btn btn-sm btn-outline-primary" data-bs-toggle="tooltip">
                                         <i class="fas fa-edit"></i>
                                     </a>
                                     <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#questionModal{{ question.id }}" title="Preview">
@@ -165,16 +165,15 @@
     </div>
 
     <!-- Pagination -->
-    {% if is_paginated %}
         <div class="mt-4">
             <nav>
                 <ul class="pagination justify-content-center">
-                    {% if page_obj.has_previous %}
+                    {% if questions.has_previous %}
                         <li class="page-item">
                             <a class="page-link" href="?page=1{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">First</a>
                         </li>
                         <li class="page-item">
-                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">Previous</a>
+                            <a class="page-link" href="?page={{ questions.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">Previous</a>
                         </li>
                     {% else %}
                         <li class="page-item disabled">
@@ -185,24 +184,24 @@
                         </li>
                     {% endif %}
                     
-                    {% for i in paginator.page_range %}
-                        {% if page_obj.number == i %}
+                    {% for i in questions.page_range %}
+                        {% if questions.number == i %}
                             <li class="page-item active">
                                 <a class="page-link" href="#">{{ i }}</a>
                             </li>
-                        {% elif i > page_obj.number|add:'-3' and i < page_obj.number|add:'3' %}
+                        {% elif i > questions.number|add:'-3' and i < questions.number|add:'3' %}
                             <li class="page-item">
                                 <a class="page-link" href="?page={{ i }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">{{ i }}</a>
                             </li>
                         {% endif %}
                     {% endfor %}
                     
-                    {% if page_obj.has_next %}
+                    {% if questions.has_next %}
                         <li class="page-item">
-                            <a class="page-link" href="?page={{ page_obj.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">Next</a>
+                            <a class="page-link" href="?page={{ questions.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">Next</a>
                         </li>
                         <li class="page-item">
-                            <a class="page-link" href="?page={{ paginator.num_pages }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">Last</a>
+                            <a class="page-link" href="?page={{ questions.paginator.num_pages }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">Last</a>
                         </li>
                     {% else %}
                         <li class="page-item disabled">
@@ -215,7 +214,6 @@
                 </ul>
             </nav>
         </div>
-    {% endif %}
 </div>
 {% endblock %}
 

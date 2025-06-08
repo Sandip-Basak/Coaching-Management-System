@@ -78,12 +78,12 @@
         const slugInput = document.getElementById('{{ form.slug.id_for_label }}');
         
         nameInput.addEventListener('keyup', function() {
-            if (!slugInput.value) {
+            // if (!slugInput.value) {
                 slugInput.value = nameInput.value
                     .toLowerCase()
                     .replace(/[^\w\s]/gi, '')
                     .replace(/\s+/g, '-');
-            }
+            // }
         });
     });
 </script>

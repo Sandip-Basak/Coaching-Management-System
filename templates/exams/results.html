@@ -2,7 +2,7 @@
 
 {% block title %}Exam Results - Coaching Management System{% endblock %}
 
-{% block extra_css %}
+{% block extra_head %}
 <style>
     .result-header {
         border-radius: 5px;
@@ -90,7 +90,7 @@
                         </p>
                     </div>
                     <div class="col-md-4 text-center">
-                        <div class="score-circle bg-{{ percentage|floatformat:0|divisibleby:10|yesno:'danger,warning,warning,warning,info,info,info,success,success,success,success' }}-subtle">
+                        <div class="score-circle bg-{{ percentage|floatformat:0|divisibleby:10|yesno:'danger,warning,warning,warning,info,info,info,success,success,success,success' }}">
                             {{ percentage|floatformat:1 }}%
                         </div>
                         <p class="mt-2">

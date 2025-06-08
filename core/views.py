@@ -658,6 +658,13 @@ def exam_results(request, attempt_id):
     results = []
     total_marks = 0
     scored_marks = 0
+
+    if attempt.practice_paper:
+        for question in attempt.practice_paper.questions.all():
+            total_marks += question.marks
+    elif attempt.mock_exam:
+        for question in attempt.mock_exam.questions.all():
+            total_marks += question.marks
     
     for answer in answers:
         question = answer.question
@@ -677,7 +684,7 @@ def exam_results(request, attempt_id):
             is_correct = (len(selected_options) == 1) and selected_options.first().is_correct
         
         question_score = question.marks if is_correct else 0
-        total_marks += question.marks
+        # total_marks += question.marks
         scored_marks += question_score
         
         results.append({
@@ -714,6 +721,7 @@ def trial_results(request, attempt_id):
     results = []
     total_marks = 0
     scored_marks = 0
+
     
     for answer in answers:
         question = answer.question
@@ -753,6 +761,12 @@ def trial_results(request, attempt_id):
         'percentage': (scored_marks / total_marks * 100) if total_marks > 0 else 0,
         'is_trial': True
     }
+    if total_marks > 0:
+        score_percentage = (scored_marks / total_marks) * 100
+    else:
+        score_percentage = 0
+    attempt.score = score_percentage
+    attempt.save()
     return render(request, 'exams/results.html', context)
 
 

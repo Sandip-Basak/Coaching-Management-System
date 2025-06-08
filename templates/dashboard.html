@@ -4,34 +4,19 @@
 
 {% block content %}
 <div class="row mb-4">
-    <div class="col-md-12">
+    <div class="col-sm-10">
         <h1 class="mb-4">Student Dashboard</h1>
-        
-        <div class="alert alert-info">
-            <i class="fas fa-info-circle me-2"></i> Welcome back, {{ user.first_name }}! Here's your learning dashboard.
-        </div>
+    </div>
+    <div class="col-sm-2">
+        <a href="{% url 'profile_view' %}" class="btn btn-sm btn-outline-primary w-100">Profile</a>
     </div>
 </div>
-<!-- <div class="row mb-4">
-    <div class="col-md-4">
-        <div class="card h-100">
-            <div class="card-body text-center">
-                <div class="mb-3">
-                    {% if user.student_profile.profile_photo %}
-                        <img src="{{ user.student_profile.profile_photo }}" alt="Profile Photo" class="img-fluid rounded-circle profile-img">
-                    {% else %}
-                        <div class="profile-placeholder">
-                            <i data-feather="user" class="profile-icon"></i>
-                        </div>
-                    {% endif %}
-                </div>
-                <h4>{{ user.first_name }} {{ user.last_name }}</h4>
-                <p class="text-muted">@{{ user.username }}</p>
-                <p>{{ user.email }}</p>
-                <a href="#" class="btn btn-sm btn-outline-primary">Edit Profile</a>
-            </div>
-        </div>
-    </div> -->
+<div class="alert alert-info alert-dismissible fade show">
+    <i class="fas fa-info-circle me-2"></i> Welcome back, {{ user.first_name }}!
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+</div>
+
+
 <div class="row mb-4">
     <div class="col-md-4">
         <div class="card h-100">

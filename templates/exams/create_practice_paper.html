@@ -95,7 +95,7 @@
 
                         <div class="mb-3">
                             <label for="{{ form.questions.id_for_label }}" class="form-label">Questions</label>
-                            <select name="{{ form.questions.name }}" id="id_questions" multiple>
+                            <select name="{{ form.questions.name }}" id="id_questions" class="form-control" multiple>
                                 {% for question in form.questions.field.queryset %}
                                     <option value="{{ question.id }}" data-course-id="{{ question.course.id }}">{{ question.text }}</option>
                                 {% endfor %}

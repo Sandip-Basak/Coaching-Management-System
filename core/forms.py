@@ -42,6 +42,9 @@ class ProfileUpdateForm(forms.ModelForm):
     class Meta:
         model = StudentProfile
         fields = ('profile_photo',)
+        widgets = {
+            'profile_photo' : forms.FileInput(attrs={'class': 'form-control'}),
+        }
 
 
 class CourseForm(forms.ModelForm):
@@ -50,7 +53,9 @@ class CourseForm(forms.ModelForm):
         model = Course
         fields = ('name', 'description', 'slug')
         widgets = {
-            'description': forms.Textarea(attrs={'rows': 5}),
+            'name': forms.TextInput(attrs={'class': 'form-control'}),
+            'description': forms.Textarea(attrs={'rows': 5, 'class': 'form-control'}),
+            'slug': forms.TextInput(attrs={'class': 'form-control'}),
         }
         help_texts = {
             'slug': 'URL-friendly name (e.g., "python-programming"). Leave blank to auto-generate.',
@@ -63,8 +68,11 @@ class BatchForm(forms.ModelForm):
         model = Batch
         fields = ('course', 'name', 'start_date', 'end_date', 'students')
         widgets = {
-            'start_date': forms.DateInput(attrs={'type': 'date'}),
-            'end_date': forms.DateInput(attrs={'type': 'date'}),
+            'course': forms.Select(attrs={'class': 'form-control bg-dark'}),
+            'name': forms.TextInput(attrs={'class': 'form-control'}),
+            'start_date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'end_date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'students': forms.SelectMultiple(attrs={'class': 'form-control bg-dark'}),
         }
 
 
@@ -74,7 +82,11 @@ class QuestionForm(forms.ModelForm):
         model = Question
         fields = ('course', 'text', 'marks', 'multiple_correct')
         widgets = {
-            'text': forms.Textarea(attrs={'rows': 3}),
+            'course': forms.Select(attrs={'class': 'form-control bg-dark'}),
+            'text': forms.Textarea(attrs={'rows': 3,'class': 'form-control'}),
+            'marks': forms.NumberInput(attrs={'class': 'form-control'}),
+            'multiple_correct' : forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+
         }
 
 
@@ -82,7 +94,9 @@ OptionFormSet = inlineformset_factory(
     Question, Option, 
     fields=('text', 'is_correct'),
     extra=4, can_delete=True,
-    widgets={'text': forms.TextInput(attrs={'class': 'form-control'})}
+    widgets={'text': forms.TextInput(attrs={'class': 'form-control'}),
+            'is_correct' : forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+}
 )
 
 
@@ -92,8 +106,11 @@ class PracticePaperForm(forms.ModelForm):
         model = PracticePaper
         fields = ('name', 'course', 'allowed_for_trial', 'trial_question_count', 'time_limit', 'questions')
         widgets = {
-            'time_limit': forms.NumberInput(attrs={'min': 5, 'max': 180}),
-            'trial_question_count': forms.NumberInput(attrs={'min': 1, 'max': 20}),
+            'name': forms.TextInput(attrs={'class': 'form-control'}),
+            'course': forms.Select(attrs={'class': 'form-control bg-dark'}),
+            'allowed_for_trial' : forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'time_limit': forms.NumberInput(attrs={'min': 5, 'max': 180, 'class': 'form-control bg-dark'}),
+            'trial_question_count': forms.NumberInput(attrs={'min': 1, 'max': 20, 'class': 'form-control bg-dark'}),
         }
         help_texts = {
             'time_limit': 'Time limit in minutes',
@@ -107,7 +124,10 @@ class MockExamForm(forms.ModelForm):
         model = MockExam
         fields = ('name', 'course', 'time_limit', 'questions', 'results_released')
         widgets = {
-            'time_limit': forms.NumberInput(attrs={'min': 5, 'max': 180}),
+            'name': forms.TextInput(attrs={'class': 'form-control'}),
+            'course': forms.Select(attrs={'class': 'form-control bg-dark'}),
+            'time_limit': forms.NumberInput(attrs={'min': 5, 'max': 180, 'class': 'form-control'}),
+            'results_released' : forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         }
         help_texts = {
             'time_limit': 'Time limit in minutes',
@@ -119,29 +139,33 @@ class ImportQuestionsForm(forms.Form):
     """Form for importing questions from Excel"""
     excel_file = forms.FileField(
         label='Select Excel File',
+        widget=forms.FileInput(attrs={'class': 'form-control'}),
         help_text='Excel file must have columns: Question, Option A-D, Correct Options (comma-separated), Marks'
     )
     course = forms.ModelChoiceField(
         queryset=Course.objects.all(), # Allow selecting any existing course
         label='Select Course',
-        empty_label='--- Select a Course ---' # Optional: Add a placeholder option
+        empty_label='--- Select a Course ---',
+        widget=forms.Select(attrs={'class': 'form-control bg-dark'}),
     )
 
 
 class AIQuestionsForm(forms.Form):
     """Form for generating questions using AI from PDF"""
-    pdf_file = forms.FileField(label='Upload PDF')
+    pdf_file = forms.FileField(label='Upload PDF',widget=forms.FileInput(attrs={'class': 'form-control'}))
     num_questions = forms.IntegerField(
         label='Number of Questions', 
         min_value=1, 
         max_value=50,
         initial=10,
-        help_text='How many questions to generate (1-50)'
+        help_text='How many questions to generate (1-50)',
+        widget=forms.NumberInput(attrs={'class': 'form-control'}),
     )
     course = forms.ModelChoiceField(
         queryset=Course.objects.all(), # Allow selecting any existing course
         label='Select Course',
-        empty_label='--- Select a Course ---' # Optional: Add a placeholder option
+        empty_label='--- Select a Course ---',
+        widget=forms.Select(attrs={'class': 'form-control bg-dark'}),
     )
 
 
@@ -151,8 +175,12 @@ class CourseMaterialForm(forms.ModelForm):
         model = CourseMaterial
         fields = ('title', 'description', 'material_type', 'file', 'video_embed_code', 'batch')
         widgets = {
-            'description': forms.Textarea(attrs={'rows': 3}),
-            'video_embed_code': forms.Textarea(attrs={'rows': 3}),
+            'title': forms.TextInput(attrs={'class': 'form-control'}),
+            'description': forms.Textarea(attrs={'rows': 3,'class': 'form-control'}),
+            'material_type': forms.Select(attrs={'class': 'form-control bg-dark'}),
+            'video_embed_code': forms.Textarea(attrs={'rows': 3,'class': 'form-control'}),
+            'file' : forms.FileInput(attrs={'class': 'form-control'}),
+            'batch': forms.Select(attrs={'class': 'form-control bg-dark'}),
         }
         
     def clean(self):

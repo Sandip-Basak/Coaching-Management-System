@@ -19,13 +19,21 @@ def calculate_score(attempt):
     """Calculate score for an attempt"""
     total_score = 0
     total_possible = 0
+
+    if attempt.practice_paper:
+        for question in attempt.practice_paper.questions.all():
+            total_possible += question.marks
+    elif attempt.mock_exam:
+        for question in attempt.mock_exam.questions.all():
+            total_possible += question.marks
     
+    print(total_possible)
     for answer in attempt.answers.all():
         question = answer.question
         selected_options = answer.selected_options.all()
         correct_options = question.options.filter(is_correct=True)
         
-        total_possible += question.marks
+        # total_possible += question.marks
         
         if question.multiple_correct:
             # All correct options must be selected and no incorrect ones
