@@ -1,5 +1,7 @@
 {% extends 'base.html' %}
 
+{% load static %}
+
 {% block title %}Import Questions{% endblock %}
 
 {% block content %}
@@ -79,7 +81,7 @@
             <div class="card-body">
                 <p class="card-text">You can download a template Excel file with the correct format to get started.</p>
                 <div class="d-grid">
-                    <a href="#" class="btn btn-success">
+                    <a href="{% static 'assets/question_template.xlsx' %}" download="question_template" class="btn btn-success">
                         <i class="fas fa-file-excel me-2"></i>Download Template
                     </a>
                 </div>
