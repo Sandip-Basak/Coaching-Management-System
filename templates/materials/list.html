@@ -44,11 +44,13 @@
                 <div class="card h-100">
                     <div class="card-header bg-dark d-flex justify-content-between align-items-center">
                         <h5 class="card-title mb-0">{{ material.title }}</h5>
-                        <span class="badge bg-{% if material.material_type == 'pdf' %}danger{% else %}info{% endif %}">
+                        <span class="badge bg-{% if material.material_type == 'pdf' %}danger{% elif material.material_type == 'video' %}info{% else %}primary{% endif %}">
                             {% if material.material_type == 'pdf' %}
                                 <i class="fas fa-file-pdf me-1"></i>PDF
-                            {% else %}
+                            {% elif material.material_type == 'video' %}
                                 <i class="fas fa-video me-1"></i>Video
+                            {% else %}
+                                <i class="fas fa-external-link-alt me-1"></i>Link
                             {% endif %}
                         </span>
                     </div>
@@ -73,6 +75,10 @@
                         {% if material.material_type == 'pdf' %}
                             <a href="{{ material.file.url }}" class="btn btn-primary w-100" target="_blank">
                                 <i class="fas fa-external-link-alt me-2"></i>View/Download PDF
+                            </a>
+                        {% elif material.material_type == 'link' %}
+                            <a href="{{ material.external_url }}" class="btn btn-primary w-100" target="_blank">
+                            <i class="fas fa-external-link-alt me-2"></i>Go to Link
                             </a>
                         {% else %}
                             <button class="btn btn-primary w-100" data-bs-toggle="modal" data-bs-target="#videoModal-{{ material.id }}">

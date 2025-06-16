@@ -37,12 +37,10 @@ def home(request):
         'courses': courses,
         'practice_papers': practice_papers,
     }
-    return render(request, 'index.html', context)
+    return render(request, 'home.html', context)
 
 
 def signup_view(request):
-    if request.user.is_authenticated:
-        return redirect("dashboard")
     """User registration view"""
     if request.method == 'POST':
         form = SignUpForm(request.POST, request.FILES)
@@ -68,8 +66,6 @@ def signup_view(request):
 
 
 def login_view(request):
-    if request.user.is_authenticated:
-        return redirect("dashboard")
     """Login view"""
     if request.method == 'POST':
         form = LoginForm(request=request, data=request.POST)

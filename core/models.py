@@ -198,6 +198,7 @@ class CourseMaterial(models.Model):
     TYPE_CHOICES = (
         ('pdf', 'PDF Document'),
         ('video', 'Video Link'),
+        ('link', 'External Link'),
     )
     
     title = models.CharField(max_length=255)
@@ -205,6 +206,7 @@ class CourseMaterial(models.Model):
     material_type = models.CharField(max_length=10, choices=TYPE_CHOICES)
     file = models.FileField(upload_to=material_id, null=True, blank=True)
     video_embed_code = models.TextField(null=True, blank=True)
+    external_url = models.CharField(max_length=255, null=True, blank=True)
     batch = models.ForeignKey(Batch, on_delete=models.CASCADE, related_name='materials')
     uploaded_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='uploaded_materials')
     uploaded_at = models.DateTimeField(auto_now_add=True)

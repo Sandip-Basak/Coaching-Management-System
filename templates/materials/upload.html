@@ -67,6 +67,17 @@
                             {% endif %}
                         </div>
                         
+                        <div class="mb-3" id="external-link-section" style="display: none;">
+                            <label for="{{ form.external_url.id_for_label }}" class="form-label">External URL</label>
+                            {{ form.external_url }}
+                            <div class="form-text">Paste the full URL for the external resource (e.g., https://example.com/resource).</div>
+                            {% if form.external_url.errors %}
+                                <div class="text-danger">
+                                    {{ form.external_url.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+
                         <div class="mb-3">
                             <label for="{{ form.batch.id_for_label }}" class="form-label">Batch</label>
                             {{ form.batch }}
@@ -95,14 +106,21 @@
         const materialTypeSelect = document.getElementById('{{ form.material_type.id_for_label }}');
         const fileUploadSection = document.getElementById('file-upload-section');
         const videoEmbedSection = document.getElementById('video-embed-section');
+        const externalLinkSection = document.getElementById('external-link-section');
         
         function toggleSections() {
             if (materialTypeSelect.value === 'pdf') {
                 fileUploadSection.style.display = 'block';
                 videoEmbedSection.style.display = 'none';
+                externalLinkSection.style.display = 'none';
             } else if (materialTypeSelect.value === 'video') {
                 fileUploadSection.style.display = 'none';
                 videoEmbedSection.style.display = 'block';
+                externalLinkSection.style.display = 'none';
+            } else if (materialTypeSelect.value === 'link') {
+                fileUploadSection.style.display = 'none';
+                videoEmbedSection.style.display = 'none';
+                externalLinkSection.style.display = 'block';
             }
         }
         
@@ -113,7 +131,7 @@
         
         // Validate file size
         const fileInput = document.getElementById('{{ form.file.id_for_label }}');
-        const maxSize = 10 * 1024 * 1024; // 10MB
+        const maxSize = 5 * 1024 * 1024; // 5MB
         
         fileInput.addEventListener('change', function() {
             if (fileInput.files.length > 0) {

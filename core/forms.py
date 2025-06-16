@@ -173,7 +173,7 @@ class CourseMaterialForm(forms.ModelForm):
     """Form for uploading course materials"""
     class Meta:
         model = CourseMaterial
-        fields = ('title', 'description', 'material_type', 'file', 'video_embed_code', 'batch')
+        fields = ('title', 'description', 'material_type', 'file', 'video_embed_code','external_url' , 'batch')
         widgets = {
             'title': forms.TextInput(attrs={'class': 'form-control'}),
             'description': forms.Textarea(attrs={'rows': 3,'class': 'form-control'}),
@@ -181,6 +181,7 @@ class CourseMaterialForm(forms.ModelForm):
             'video_embed_code': forms.Textarea(attrs={'rows': 3,'class': 'form-control'}),
             'file' : forms.FileInput(attrs={'class': 'form-control'}),
             'batch': forms.Select(attrs={'class': 'form-control bg-dark'}),
+            'external_url': forms.URLInput(attrs={'class': 'form-control'}),
         }
         
     def clean(self):
@@ -188,6 +189,7 @@ class CourseMaterialForm(forms.ModelForm):
         material_type = cleaned_data.get('material_type')
         file = cleaned_data.get('file')
         video_embed_code = cleaned_data.get('video_embed_code')
+        external_url = cleaned_data.get('external_url')
         
         if material_type == 'pdf' and not file:
             self.add_error('file', 'PDF file is required for this material type.')
@@ -195,4 +197,7 @@ class CourseMaterialForm(forms.ModelForm):
         if material_type == 'video' and not video_embed_code:
             self.add_error('video_embed_code', 'Video embed code is required for this material type.')
         
+        if material_type == 'link' and not external_url:
+            self.add_error('external_url', 'External URL is required for this material type.')
+
         return cleaned_data

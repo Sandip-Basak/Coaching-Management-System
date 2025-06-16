@@ -197,6 +197,8 @@
                                         </span>
                                         {% if material.material_type == 'pdf' %}
                                             <a href="{{ material.file.url }}" class="btn btn-sm btn-primary" target="_blank">Download</a>
+                                        {% elif material.material_type == 'link' %}
+                                            <a href="{{ material.external_url }}" class="btn btn-sm btn-primary" target="_blank"><i class="fas fa-external-link-alt"></i> View Link</a>
                                         {% else %}
                                             <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#videoModal{{ material.id }}">
                                                 Watch Video
