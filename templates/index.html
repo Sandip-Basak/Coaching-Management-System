@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 
@@ -31,8 +32,18 @@
         <div class="text-primary text-2xl font-extrabold">TechNest</div>
       </div>
       <div class="hidden lg:flex gap-3">
-        <button class="px-4 py-2 bg-primary text-white rounded-lg text-sm font-semibold hover:bg-blue-700">Sign Up</button>
-        <button class="px-4 py-2 bg-slate-200 text-slate-900 rounded-lg text-sm font-semibold hover:bg-slate-300">Login</button>
+        {% if not user.is_authenticated %}
+        <a href="{% url 'signup' %}">
+          <button class="px-4 py-2 bg-primary text-white rounded-lg text-sm font-semibold hover:bg-blue-700">Sign Up</button>
+        </a>
+        <a href="{% url 'login' %}">
+          <button class="px-4 py-2 bg-slate-200 text-slate-900 rounded-lg text-sm font-semibold hover:bg-slate-300">Login</button>
+        </a>
+        {% else %}
+        <a href="{% url 'dashboard' %}">
+          <button class="px-4 py-2 bg-slate-200 text-slate-900 rounded-lg text-sm font-semibold hover:bg-slate-300">Dashboard</button>
+        </a>
+        {% endif %}
       </div>
       <button id="menuBtn" class="lg:hidden">
         <svg class="w-6 h-6 text-slate-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -43,8 +54,18 @@
 
     <!-- Mobile Menu -->
     <div id="mobileMenu" class="hidden bg-white border-t p-4 space-y-3 lg:hidden">
-      <button class="w-full px-4 py-2 bg-primary text-white rounded-lg text-sm font-semibold hover:bg-blue-700">Sign Up</button>
-      <button class="w-full px-4 py-2 bg-slate-200 text-slate-900 rounded-lg text-sm font-semibold hover:bg-slate-300">Login</button>
+      {% if not user.is_authenticated %}
+      <a href="{% url 'signup' %}">
+        <button class="w-full px-4 py-2 bg-primary text-white rounded-lg text-sm font-semibold hover:bg-blue-700 mb-2">Sign Up</button>
+      </a>
+      <a href="{% url 'login' %}">
+        <button class="w-full px-4 py-2 bg-slate-200 text-slate-900 rounded-lg text-sm font-semibold hover:bg-slate-300">Login</button>
+      </a>
+      {% else %}
+      <a href="{% url 'dashboard' %}">
+        <button class="w-full px-4 py-2 bg-slate-200 text-slate-900 rounded-lg text-sm font-semibold hover:bg-slate-300">Dashboard</button>
+      </a>
+      {% endif %}
     </div>
   </header>
 
@@ -53,14 +74,18 @@
     <div class="min-h-[calc(100vh-80px)] max-h-[800px] flex flex-col items-center justify-center gap-8 p-6 sm:p-10 text-center bg-cover bg-center bg-no-repeat relative" style='background-image: linear-gradient(rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0.7) 100%), url("https://lh3.googleusercontent.com/aida-public/AB6AXuBQS34AJq4RAwXr_1-nHFvCI5W2yegWKPkVDtM6DLT0IjXe6I13TcOyDSQeDpkUx7q57wH3faXvglT7e6NhQQ2s2QjYpSMjPiJZqdp0ZlM4Mv-n9LZWoySLhUDXm_pVbI-sPH5MonVRQmzpdxUjUAtJmlJ2kvgRcT3m-NwS3gPF2UxP3MyICQJ4futgGnW6y6uorujfbYJppe4gEQhowvai-Q0_o9JQZUAdZr6vN7GlsReGtqfkEzsm7dGL7Tr4HlaGGxDka-6bBzfs");'>
         <div class="min-h-[calc(100vh-64px)] flex flex-col justify-center px-4 py-16 sm:px-8">
           <h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold leading-tight">
-            Empowering Tomorrow’s Leaders Today
+            Empowering Tomorrow’s Developers Today
           </h1>
           <p class="mt-4 text-base sm:text-lg md:text-xl text-slate-300 max-w-xl mx-auto">
-            Join 10,000+ students achieving excellence with world-class teachers
+            Join 1000+ students achieving excellence with world-class teachers
           </p>
           <div class="mt-6 flex flex-col sm:flex-row gap-4 justify-center">
-            <button class="px-6 py-3 bg-primary text-white rounded-lg text-base font-semibold hover:bg-blue-700">Explore Courses</button>
-            <button class="px-6 py-3 bg-white text-slate-900 rounded-lg text-base font-semibold hover:bg-slate-200">Practice Papers Free</button>
+            <a href="#course">
+              <button class="px-6 py-3 bg-primary text-white rounded-lg text-base font-semibold hover:bg-blue-700">Explore Courses</button>
+            </a>
+            <a href="#practice_paper">
+              <button class="px-6 py-3 bg-white text-slate-900 rounded-lg text-base font-semibold hover:bg-slate-200">Practice Papers Free</button>
+            </a>
           </div>
         </div>
     </div>
@@ -89,55 +114,47 @@
   </section>
 
   <!-- Courses Overview -->
-  <section class="py-12">
+  <section class="py-12" id="course">
     <div class="max-w-7xl mx-auto px-4">
       <h2 class="text-3xl font-bold text-center mb-8">Courses Overview</h2>
+      
+      {% if courses %}
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {% for course in courses %}
         <div class="p-6 bg-white rounded-lg shadow hover:shadow-lg">
-          <h3 class="text-xl font-semibold mb-2">Science</h3>
-          <p class="text-slate-600 mb-3">Explore physics, chemistry, and biology with engaging lessons and experiments.</p>
-          <a href="#" class="text-primary font-medium hover:underline">Learn More →</a>
+          <h3 class="text-xl font-semibold mb-2">{{ course.name }}</h3>
+          <p class="text-slate-600 mb-3">{{ course.description|truncatechars:100 }}</p>
+          <a href="{% url 'course_detail' course.slug %}" class="text-primary font-medium hover:underline">Learn More →</a>
         </div>
-        <div class="p-6 bg-white rounded-lg shadow hover:shadow-lg">
-          <h3 class="text-xl font-semibold mb-2">Math</h3>
-          <p class="text-slate-600 mb-3">Master algebra, geometry, calculus with expert guidance.</p>
-          <a href="#" class="text-primary font-medium hover:underline">Learn More →</a>
-        </div>
-        <div class="p-6 bg-white rounded-lg shadow hover:shadow-lg">
-          <h3 class="text-xl font-semibold mb-2">Computer Science</h3>
-          <p class="text-slate-600 mb-3">Learn coding, algorithms, and software development from industry professionals.</p>
-          <a href="#" class="text-primary font-medium hover:underline">Learn More →</a>
-        </div>
+        {% endfor %}
       </div>
+        {% else %}
+        <p class="text-center">No courses available at the moment.</p>
+        {% endif %}
+        
     </div>
   </section>
 
   <!-- Practice Papers Section -->
-  <section class="py-12 bg-slate-50">
+  <section class="py-12 bg-slate-50" id="practice_paper">
     <div class="max-w-7xl mx-auto px-4">
       <h2 class="text-3xl font-bold text-center mb-8">Free Practice Papers</h2>
+      
+      {% if practice_papers %}
+      {% for paper in practice_papers %}
       <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
         <div class="p-4 bg-white rounded-lg shadow hover:shadow-lg text-center">
-          <h3 class="text-lg font-semibold mb-2">Science</h3>
-          <p class="text-slate-600 text-sm">Physics, Chemistry, Biology</p>
-          <button class="mt-4 px-4 py-2 bg-primary text-white rounded-md text-sm font-medium hover:bg-blue-700">Try Now</button>
-        </div>
-        <div class="p-4 bg-white rounded-lg shadow hover:shadow-lg text-center">
-          <h3 class="text-lg font-semibold mb-2">Math</h3>
-          <p class="text-slate-600 text-sm">Algebra, Calculus, Geometry</p>
-          <button class="mt-4 px-4 py-2 bg-primary text-white rounded-md text-sm font-medium hover:bg-blue-700">Try Now</button>
-        </div>
-        <div class="p-4 bg-white rounded-lg shadow hover:shadow-lg text-center">
-          <h3 class="text-lg font-semibold mb-2">Computer Science</h3>
-          <p class="text-slate-600 text-sm">Programming, Algorithms</p>
-          <button class="mt-4 px-4 py-2 bg-primary text-white rounded-md text-sm font-medium hover:bg-blue-700">Try Now</button>
-        </div>
-        <div class="p-4 bg-white rounded-lg shadow hover:shadow-lg text-center">
-          <h3 class="text-lg font-semibold mb-2">Languages</h3>
-          <p class="text-slate-600 text-sm">Improve fluency and grammar</p>
-          <button class="mt-4 px-4 py-2 bg-primary text-white rounded-md text-sm font-medium hover:bg-blue-700">Try Now</button>
+          <h3 class="text-lg font-semibold mb-2">{{ paper.name }}</h3>
+          <p class="text-slate-600 text-sm">{{ paper.course.name }}</p>
+          <a href="{% url 'start_trial_exam' paper.id %}">
+            <button class="mt-4 px-4 py-2 bg-primary text-white rounded-md text-sm font-medium hover:bg-blue-700">Try Now</button>
+          </a>
         </div>
       </div>
+      {% endfor %}
+      {% else %}
+        <p class="text-center">No free practice papers available at the moment.</p>
+      {% endif %}
     </div>
   </section>
 
@@ -147,7 +164,7 @@
       <h2 class="text-3xl font-bold text-center mb-8">Student Reviews</h2>
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div class="p-6 bg-white rounded-lg shadow">
-          <p class="text-slate-600 italic mb-3">"EduPath transformed my learning! I've improved my grades significantly."</p>
+          <p class="text-slate-600 italic mb-3">"TechNest transformed my learning! I've got a job recently."</p>
           <h4 class="font-semibold">Sophia Clark</h4>
         </div>
         <div class="p-6 bg-white rounded-lg shadow">
@@ -165,14 +182,16 @@
   <!-- Footer -->
   <footer class="bg-slate-900 text-slate-300 py-10">
     <div class="max-w-7xl mx-auto px-4 text-center">
-      <div class="text-white text-lg font-bold mb-3">EduPath</div>
+      <div class="text-white text-lg font-bold mb-3">TechNest</div>
       <p class="text-sm mb-4">Empowering students with quality education and fostering a passion for lifelong learning.</p>
       <div class="flex justify-center gap-4 mb-4">
         <a href="#" class="hover:text-white">Facebook</a>
         <a href="#" class="hover:text-white">Instagram</a>
         <a href="#" class="hover:text-white">LinkedIn</a>
       </div>
-      <div class="text-xs text-slate-400">© 2025 EduPath. All rights reserved.</div>
+      <div class="text-xs text-slate-400">
+        <span class="text-muted">Powered by Traffic Grid<br>Connect with us at <a href="https://ads.trafficgrid.in/" class="text-decoration-none text-muted" target="_blank">ads.trafficgrid.in</a></span>
+      </div>
     </div>
   </footer>
 
